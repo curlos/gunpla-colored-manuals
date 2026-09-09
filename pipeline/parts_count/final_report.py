@@ -21,7 +21,7 @@ import sys
 from collections import defaultdict
 from detect_circles import detect_circles
 from detect_labels import detect_labels
-from pipeline import cluster_circles_to_labels, read_digit
+from cluster_geom import cluster_circles_by_geometry
 
 DEFAULT_PAGES = [
     ('full/p06.png', 'p6'),
@@ -52,6 +52,45 @@ def fix_labels(page_tag, valid_labels):
     return valid_labels
 
 
+def process_page(path, tag):
+    circles, gray_full = detect_circles(path)
+    labels, pagebox, material_boxes = detect_labels(path)
+    labels = fix_labels(tag, labels)
+
+    if tag == 'p8':
+        # p8 has a dashed side-note box (finger-joint caution text) to the
+        # right of MP2, and a "color seal / decal" note box at the bottom -
+        # both contain small Kanji glyphs that pass the circle/fill filter.
+        # Neither is a parts runner, so drop anything in those zones.
+        circles = [c for c in circles if not (c['cx'] > 1040 or c['cy'] > 600)]
+
+    # drop circles landing on the label box itself, or on its material-
+    # composition line just below (e.g. "(スチロール樹脂:PS)" - a Kanji
+    # radical there occasionally passes the circle/fill filter). The
+    # material line's own OCR'd box is used instead of a blind padding
+    # guess below the label, since the real gap to it (and to the actual
+    # diagram below it) varies a lot runner to runner.
+    def in_label_text_zone(c):
+        for lb in labels:
+            if (lb['box_l'] - 5 <= c['cx'] <= lb['box_r'] + 5 and
+                    lb['box_t'] - 5 <= c['cy'] <= lb['box_b'] + 5):
+                return True
+        for (x0, y0, x1, y1) in material_boxes:
+            if x0 - 5 <= c['cx'] <= x1 + 5 and y0 - 5 <= c['cy'] <= y1 + 5:
+                return True
+        return False
+    circles = [c for c in circles if not in_label_text_zone(c)]
+
+    comps, comp_to_label, mult_map, unassigned = cluster_circles_by_geometry(circles, labels, gray_full)
+
+    per_runner = defaultdict(int)
+    for c in circles:
+        if c['code']:
+            per_runner[c['code']] += 1
+
+    return per_runner, mult_map, unassigned
+
+
 def main():
     if len(sys.argv) > 1:
         pages = [(p, f'p{i+1}') for i, p in enumerate(sys.argv[1:])]
@@ -61,51 +100,18 @@ def main():
     grand_total = 0
     all_rows = []
     for path, tag in pages:
-        circles, gray_full = detect_circles(path)
-        labels, pagebox = detect_labels(path)
-
-        labels = fix_labels(tag, labels)
-
-        if tag == 'p8':
-            # p8 has a dashed side-note box (finger-joint caution text) to the
-            # right of MP2, and a "color seal / decal" note box at the bottom -
-            # both contain small Kanji glyphs that pass the circle/fill filter.
-            # Neither is a parts runner, so drop anything in those zones.
-            circles = [c for c in circles if not (c['cx'] > 1040 or c['cy'] > 600)]
-
-        # drop circles landing on the label/material text itself
-        def in_label_text_zone(c):
-            for lb in labels:
-                if (lb['box_l'] - 5 <= c['cx'] <= lb['box_r'] + 5 and
-                        lb['box_t'] - 5 <= c['cy'] <= lb['box_b'] + 10):
-                    return True
-            return False
-        circles = [c for c in circles if not in_label_text_zone(c)]
-
-        valid_labels = cluster_circles_to_labels(circles, labels)
-
-        per_runner2 = defaultdict(int)
-        mult_map2 = {}
-        idx_to_code = {i: lb['code'] for i, lb in enumerate(valid_labels)}
-        for c in circles:
-            if c['label_idx'] is None:
-                continue
-            code = idx_to_code[c['label_idx']]
-            if code is None:
-                continue
-            per_runner2[code] += 1
-        for lb in valid_labels:
-            if lb['code']:
-                mult_map2[lb['code']] = lb['mult']
+        per_runner, mult_map, unassigned = process_page(path, tag)
 
         print(f"\n--- {path} ---")
-        for code in sorted(per_runner2.keys()):
-            n = per_runner2[code]
-            mult = mult_map2.get(code, 1)
+        for code in sorted(per_runner.keys()):
+            n = per_runner[code]
+            mult = mult_map.get(code, 1)
             total = n * mult
             grand_total += total
             all_rows.append((code, n, mult, total))
             print(f"  {code:5s} x{mult}: {n:3d} parts/runner -> {total:3d} total")
+        if unassigned:
+            print(f"  ({unassigned} circles could not be matched to a runner)")
 
     print(f"\n=== GRAND TOTAL: {grand_total} parts ===")
     return all_rows, grand_total

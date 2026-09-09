@@ -49,7 +49,17 @@ def find_box_contours(crop_gray):
     return boxes
 
 
+MATERIAL_LINE_MARKERS = ('樹脂', 'PS)', 'PE)', 'ABS)', 'PP)', 'PVC)', 'POM)', 'PC)')
+
+
 def find_text_lines(crop_gray):
+    """Returns (runner_label_lines, material_composition_lines) - both as
+    (left, top, right, bottom) boxes. The material line (e.g. "(スチロール
+    樹脂:PS)") sits just below each runner's label and is a common source of
+    circle-detector false positives (some Kanji radicals pass the dark-fill
+    filter) - callers should exclude it tightly rather than padding a blind
+    guess below the label box, since the gap to the label above and to the
+    real diagram below varies a lot per runner."""
     data = pytesseract.image_to_data(crop_gray, lang='jpn+eng', config='--psm 11', output_type=pytesseract.Output.DICT)
     n = len(data['text'])
     lines = defaultdict(list)
@@ -59,17 +69,20 @@ def find_text_lines(crop_gray):
             continue
         key = (data['block_num'][i], data['par_num'][i], data['line_num'][i])
         lines[key].append((data['left'][i], data['top'][i], data['width'][i], data['height'][i], t))
-    out = []
+    label_lines = []
+    material_lines = []
     for key, toks in lines.items():
         toks.sort()
         text = ''.join(t[4] for t in toks)
+        l = min(t[0] for t in toks)
+        t_ = min(t[1] for t in toks)
+        r = max(t[0] + t[2] for t in toks)
+        b = max(t[1] + t[3] for t in toks)
         if ('ツ' in text or 'ーツ' in text) and '印' not in text:
-            l = min(t[0] for t in toks)
-            t_ = min(t[1] for t in toks)
-            r = max(t[0] + t[2] for t in toks)
-            b = max(t[1] + t[3] for t in toks)
-            out.append((l, t_, r, b))
-    return out
+            label_lines.append((l, t_, r, b))
+        if any(m in text for m in MATERIAL_LINE_MARKERS):
+            material_lines.append((l, t_, r, b))
+    return label_lines, material_lines
 
 
 def ocr_region(crop_gray, box, extend_right=170, pad=8, erase_border=False):
@@ -131,7 +144,7 @@ def detect_labels(img_path):
     crop = gray_full[py:py + ph, px:px + pw]
 
     boxes = find_box_contours(crop)
-    lines = find_text_lines(crop)
+    lines, material_lines = find_text_lines(crop)
 
     regions = [{'box': b, 'erase_border': True} for b in boxes]
     for (l, t_, r, b) in lines:
@@ -151,11 +164,13 @@ def detect_labels(img_path):
             'box_l': px + bx, 'box_t': py + by, 'box_r': px + bx + bw_, 'box_b': py + by + bh_,
         })
 
-    return labels, (px, py, pw, ph)
+    material_boxes = [(px + l, py + t_, px + r, py + b) for (l, t_, r, b) in material_lines]
+
+    return labels, (px, py, pw, ph), material_boxes
 
 
 if __name__ == '__main__':
     import sys
-    labels, pagebox = detect_labels(sys.argv[1])
+    labels, pagebox, material_boxes = detect_labels(sys.argv[1])
     for lb in sorted(labels, key=lambda d: (d['box_t'], d['box_l'])):
         print(lb['code'], 'x%d' % lb['mult'], '| anchor=(%d,%d)' % (lb['anchor_x'], lb['anchor_y']), '| raw:', repr(lb['raw']))

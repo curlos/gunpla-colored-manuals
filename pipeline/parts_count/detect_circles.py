@@ -51,6 +51,16 @@ def detect_circles(img_path, debug_out=None):
                 'x': int(gx - r), 'y': int(gy - r), 'w': int(w), 'h': int(h),
             })
 
+    # de-duplicate near-identical detections (Hough occasionally fires twice
+    # for the same physical circle at slightly different center/radius)
+    circles.sort(key=lambda c: -c['fill'])
+    kept = []
+    for c in circles:
+        if any(abs(c['cx'] - k['cx']) < 8 and abs(c['cy'] - k['cy']) < 8 for k in kept):
+            continue
+        kept.append(c)
+    circles = kept
+
     print(f"Found {len(circles)} candidate circles in {img_path}")
 
     if debug_out:
