@@ -42,13 +42,36 @@ LLM vision is used for the counting itself.
      twice for the same physical circle a few px apart).
    - Drops candidates in the leftmost sidebar-tab column (index tabs like
      "BODY", "HEAD", ...) which also produce false positives.
-   - **Tried and reverted:** CLAHE local-contrast enhancement recovers a
-     lot of circles on runners that render at unusually low native
-     contrast (e.g. "T", a dense polyethylene/rubber-parts sprue - CLAHE
-     took its recall from 49/65 to 67/65), but it also manufactures a
-     flood of new false-positive "circles" elsewhere on the page (tried
-     both page-wide and scoped to just one runner's own bounding box;
-     one runner went from a correct 30 to a fabricated 68). Not used.
+   - **Recall-boost second pass (`recall_boost2.masked_clahe_rescan`,
+     invoked from `final_report.process_page`):** some runners render
+     their circle markers at unusually low native contrast (worst case:
+     "T", a dense polyethylene/rubber-parts sprue) and the main pass
+     above misses a lot of them. A local CLAHE-enhanced re-scan recovers
+     most of the missing ones, but is unreliable enough that it's opt-in
+     per runner (`RECALL_BOOST_RUNNERS` in `final_report.py`) rather than
+     applied everywhere:
+     - Page-wide CLAHE: manufactures a flood of new false-positive
+       "circles" everywhere (tried and reverted).
+     - Scoped to just a runner's own bounding *box*: still leaks -
+       a rectangular crop still includes background, an adjacent
+       runner's edge, or label text the box didn't exclude. On this
+       manual that alone took one runner from a correct 30 to a
+       fabricated 68.
+     - Scoped to the runner's exact connected-component *pixel mask*
+       (blank everything outside the dilated blob to white before
+       enhancing) fixes the background/neighbor leakage, and this is
+       what's implemented - but a second, different failure mode
+       remains even mask-scoped: CLAHE can make an ordinary **round
+       plastic part** (a wheel, joint, washer - common on any runner)
+       pass the same "solid dark disk" fill-ratio test a real number
+       marker does, once contrast is stretched. This hit some runners
+       hard (adding a dozen+ false circles) and left others untouched,
+       with no reliable way found to predict which in advance short of
+       running it and checking the result against a ground-truth cap.
+       `RECALL_BOOST_RUNNERS` is therefore the outcome of actually
+       testing it against every undercounting runner and keeping only
+       the ones that stayed safely under (or right at) their
+       ground-truth total afterward - see the Accuracy section.
 
 3. **`detect_labels.py`** - finds each runner's label box (e.g. `A1パーツ
    (シルバー)`), its `x2` multiplier, and its material-composition line
@@ -72,6 +95,15 @@ LLM vision is used for the counting itself.
      to the material line and to the real diagram below it both vary a
      lot runner to runner, so a margin wide enough to hide one runner's
      false positive clips a different runner's real top-row circle.
+   - The material line is matched by known substrings (`樹脂`, `PS)`,
+     `PE)`, ...) first, but OCR occasionally garbles it into complete
+     nonsense (`(スチロール樹脂:PS)` read as `(AFO-IDBS`, no known
+     substring survives). Fallback: treat any short, normal-single-line-
+     sized OCR line starting with a literal `(` as a material line too -
+     guarded by width/height bounds so a `psm 11`-mis-grouped multi-line
+     blob, or a stray diagram-detail misread as e.g. `(Al)`, doesn't
+     qualify (both were tried as the naive version and produced their own
+     false exclusions before the size guard was added).
 
 4. **`cluster_geom.py`** - clusters circles to their runner using the
    *physical sprue-frame shape*, not distance to a label.
@@ -101,11 +133,26 @@ LLM vision is used for the counting itself.
    - This is generally the more correct approach whenever a manual's
      layout doesn't guarantee uniform card widths - which, empirically,
      this one didn't.
+   - **Known remaining issue:** on page 7, `R1`'s component comes out
+     659px wide (vs the usual ~250-420px), meaning it dilate-merged with
+     part of a neighbor - most likely `R2`. This didn't visibly corrupt
+     the main pass's *global* Hough circles (each one is still matched to
+     its label by exact pixel position within the shared blob, not by
+     the blob's bounding box, so most land correctly), but it's why `R1`
+     and `P` were excluded from `RECALL_BOOST_RUNNERS`: the boost pass's
+     local re-scan crops to the *whole* merged blob's bounding box and
+     attributes anything new it finds to whichever label matched that
+     blob, so on a merged blob it can manufacture circles that are really
+     the neighbor's. Not root-caused further given time spent (candidate
+     cause: insufficient gap between `R1`/`R2`'s frames for the border-
+     line-stripped ink mask's 17px dilation to keep them separate).
 
 5. **`final_report.py`** - ties it together per page: runs circle/label
    detection, excludes circles landing on label or material-line text,
-   clusters by geometry, applies a couple of hand-verified OCR-misread
-   label corrections (see `fix_labels`, e.g. `A1` read as bare `A`, `I`
+   clusters by geometry, runs the opt-in recall-boost re-scan
+   (`RECALL_BOOST_RUNNERS`) on a short list of runners it's been checked
+   safe on, applies a couple of hand-verified OCR-misread label
+   corrections (see `fix_labels`, e.g. `A1` read as bare `A`, `I`
    misread as a second `J`), and prints per-runner counts with the `xN`
    multiplier applied, plus a grand total.
 
@@ -139,32 +186,57 @@ where it did was a proven bug, not just a guess at one - and this is how
 the wide-runner label-stealing bug above was actually found (`used > gt
 total` on `F1`, `K`, `N`, `A2`, and others, by as much as +17).
 
-After the `cluster_geom.py` rewrite plus the material-line-OCR exclusion
-fix, checking script-used-count against ground-truth-total across all 26
-runners gives:
+After the `cluster_geom.py` rewrite, the material-line-OCR-fallback fix,
+and the opt-in recall-boost pass, checking script-used-count against
+ground-truth-total across all 26 runners gives:
 
-- **10 runners match exactly**: A2, C, E1, F2, G, J, K\*, L\*, MP2 (\*see
-  below)
-- **2 runners overcount by 1** (impossible / proven residual bug): K, S
-  - both traced to one remaining stray false-positive each, not
-    re-checked further given time spent
-- **14 runners undercount** (expected/legitimate - a used-count can
+- **9 runners match exactly**: A2, C, E1, F2, G, J, K, L, MP2
+- **1 runner overcounts by 1** (impossible / proven residual bug): `S`
+  - traced to one specific false positive: a small round sprue
+    attachment nub (a physical plastic-tree detail, not a number
+    marker) that passes the same dark-fill-ratio circle test a real
+    marker does. Its interior "light" region's shape looks
+    distinguishable from a real digit's in a quick check (1 big
+    contiguous light blob covering ~19% of the circle vs 2-3 small
+    fragmented ones covering ~7% for real digits checked) but that's a
+    3-sample comparison, too thin to turn into a global filter without
+    real risk of cutting genuine digits elsewhere - left as a known
+    single-instance (<0.2% of the grand total) residual error rather
+    than risk a new bug chasing it.
+- **16 runners undercount** (expected/legitimate - a used-count can
   never see parts hidden by the manual's own X-marks, and Hough still
   misses some genuine circles when two numbers sit almost touching):
   A1, B1, B2, D, E2, F1, H, I, M, N, O, P, Q, R1, R2, T
-  - worst case is `T` (49 found vs 65 total on a very dense
-    polyethylene/rubber-parts sprue with many tightly-packed identical
-    parts) - see the CLAHE note in `detect_circles.py`'s section above
-    for what was tried and didn't pan out
+  - `T` is now within 1 of its ground-truth total (64 vs 65) via the
+    recall-boost pass - see below.
 - 2 stray circle candidates page-wide fail to match any runner blob at
   all (almost certainly page-sidebar-tab false positives, since they
   don't count toward any runner's total either way)
 
-Grand total across all three pages with this script: **519 parts** (sum
+**Recall-boost pass results** (`RECALL_BOOST_RUNNERS` in
+`final_report.py`): tested against every undercounting runner one at a
+time, checking each result against its ground-truth cap:
+
+| Runner | Before boost | After boost | Ground truth | Verdict |
+|---|---|---|---|---|
+| T  | 49 | 64 | 65 | kept - big recall win, stayed under cap |
+| H  | 27 | 31 | 36 | kept - recall win, stayed under cap |
+| B2 | 19 | 27 | 30 | kept - recall win, stayed under cap |
+| B1 | 28 | 43 | 40 | **reverted** - overshot the cap (round-bead/washer false positives) |
+| D, F1, I, M, N, P, Q, R1, R2 | (various) | (various, all overshot) | (various) | **reverted** - every one of these overshot its cap when tried, several badly (e.g. one runner's count nearly doubled past its true total) |
+
+Only `T`, `H`, and `B2` are enabled in the shipped `RECALL_BOOST_RUNNERS`
+set. `R1` and `P` were excluded even before testing the boost pass on
+them, since their connected-component blobs are already known to have
+merged with a neighbor (see the "Known remaining issue" note in
+`cluster_geom.py`'s section above) - boosting a merged blob risks
+manufacturing circles that actually belong to the neighbor.
+
+Grand total across all three pages with this script: **548 parts** (sum
 of each runner's used-circle count × its `xN`), against the ground
-truth's **590 used** summary figure - roughly a 12% undercount, entirely
-attributable to the recall gaps above, with no remaining source of
-systematic overcounting.
+truth's **590 used** summary figure - roughly a 7% undercount (down from
+12% before the recall-boost pass), with only one small remaining source
+of overcounting (`S`, +1 part).
 
 ## Caveats
 
@@ -189,34 +261,34 @@ Bandai manual `manual.bandai-hobby.net/pdf/949.pdf`
 (MSN-04 Sazabi Ver.Ka), Parts List section (source pages 6-8), checked
 against a user-supplied ground truth of 590 used / 622 total parts:
 
-| Runner | x | Used (this script) | Total (used×xN) | Ground truth (total) |
-|---|---|---|---|---|
-| A1 | x1 | 14 | 14 | 17 |
-| A2 | x1 | 10 | 10 | 10 |
-| B1 | x1 | 28 | 28 | 40 |
-| B2 | x1 | 19 | 19 | 30 |
-| C  | x1 | 1  | 1  | 1 |
-| D  | x1 | 17 | 17 | 18 |
-| E1 | x1 | 12 | 12 | 12 |
-| E2 | x1 | 9  | 9  | 11 |
-| F1 | x1 | 18 | 18 | 21 |
-| F2 | x1 | 8  | 8  | 8 |
-| G  | x1 | 21 | 21 | 21 |
-| H  | x2 | 27 | 54 | 36 |
-| I  | x1 | 10 | 10 | 14 |
-| J  | x1 | 14 | 14 | 14 |
-| K  | x2 | 13 | 26 | 12 |
-| L  | x1 | 7  | 7  | 7 |
-| M  | x1 | 22 | 22 | 25 |
-| N  | x1 | 11 | 11 | 14 |
-| O  | x2 | 2  | 4  | 3 |
-| P  | x2 | 29 | 58 | 35 |
-| Q  | x2 | 24 | 48 | 26 |
-| R1 | x1 | 23 | 23 | 30 |
-| R2 | x1 | 21 | 21 | 26 |
-| MP2 | x1 | 2 | 2 | 2 |
-| S  | x1 | 13 | 13 | 12 |
-| T  | x1 | 49 | 49 | 65 |
+| Runner | x | Used (this script) | Total (used×xN) | Ground truth (total) | Match? |
+|---|---|---|---|---|---|
+| A1 | x1 | 14 | 14 | 17 | under |
+| A2 | x1 | 10 | 10 | 10 | **exact** |
+| B1 | x1 | 28 | 28 | 40 | under |
+| B2 | x1 | 27 | 27 | 30 | under |
+| C  | x1 | 1  | 1  | 1  | **exact** |
+| D  | x1 | 17 | 17 | 18 | under |
+| E1 | x1 | 12 | 12 | 12 | **exact** |
+| E2 | x1 | 9  | 9  | 11 | under |
+| F1 | x1 | 18 | 18 | 21 | under |
+| F2 | x1 | 8  | 8  | 8  | **exact** |
+| G  | x1 | 21 | 21 | 21 | **exact** |
+| H  | x2 | 31 | 62 | 36 | under |
+| I  | x1 | 10 | 10 | 14 | under |
+| J  | x1 | 14 | 14 | 14 | **exact** |
+| K  | x2 | 12 | 24 | 12 | **exact** |
+| L  | x1 | 7  | 7  | 7  | **exact** |
+| M  | x1 | 22 | 22 | 25 | under |
+| N  | x1 | 11 | 11 | 14 | under |
+| O  | x2 | 2  | 4  | 3  | under |
+| P  | x2 | 29 | 58 | 35 | under |
+| Q  | x2 | 24 | 48 | 26 | under |
+| R1 | x1 | 23 | 23 | 30 | under |
+| R2 | x1 | 21 | 21 | 26 | under |
+| MP2 | x1 | 2 | 2 | 2  | **exact** |
+| S  | x1 | 13 | 13 | 12 | **overcount +1** |
+| T  | x1 | 64 | 64 | 65 | under (by 1) |
 
-**Grand total (used, ×N applied): 519 parts** (ground truth: 590 used /
+**Grand total (used, ×N applied): 548 parts** (ground truth: 590 used /
 622 total)

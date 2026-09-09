@@ -82,6 +82,20 @@ def find_text_lines(crop_gray):
             label_lines.append((l, t_, r, b))
         if any(m in text for m in MATERIAL_LINE_MARKERS):
             material_lines.append((l, t_, r, b))
+        elif (text.startswith('(') and '印' not in text and len(text) <= 20
+                and 40 <= (r - l) <= 260 and (b - t_) <= 35):
+            # OCR sometimes completely garbles the material line (seen on
+            # "K": "(スチロール樹脂:PS)" -> "(AFO-IDBS") so none of the
+            # known-good marker substrings match. It's still reliably the
+            # only short line on the page starting with a literal "(" other
+            # than the excluded instruction header and the "(xN)" multiplier
+            # annotation (which sits to the right of a label, on the same
+            # line as the runner code, not on its own like this) - so use
+            # that alone as a fallback signal, guarded by a normal single-
+            # text-line size (width/height) so a stray "(Al)"-shaped misread
+            # of some unrelated diagram detail, tall because psm11 merged
+            # unrelated tokens across a big vertical span, doesn't qualify.
+            material_lines.append((l, t_, r, b))
     return label_lines, material_lines
 
 

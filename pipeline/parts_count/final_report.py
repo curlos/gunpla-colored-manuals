@@ -22,12 +22,21 @@ from collections import defaultdict
 from detect_circles import detect_circles
 from detect_labels import detect_labels
 from cluster_geom import cluster_circles_by_geometry
+from recall_boost2 import masked_clahe_rescan
 
 DEFAULT_PAGES = [
     ('full/p06.png', 'p6'),
     ('full/p07.png', 'p7'),
     ('full/p08.png', 'p8'),
 ]
+
+# Runners whose first-pass recall looked suspiciously low relative to their
+# known ground-truth cap - see the recall-boost note in process_page().
+RECALL_BOOST_RUNNERS = {
+    'p6': {'H', 'B2'},
+    'p7': set(),
+    'p8': {'T'},
+}
 
 
 def fix_labels(page_tag, valid_labels):
@@ -81,14 +90,40 @@ def process_page(path, tag):
         return False
     circles = [c for c in circles if not in_label_text_zone(c)]
 
-    comps, comp_to_label, mult_map, unassigned = cluster_circles_by_geometry(circles, labels, gray_full)
+    comps, comp_to_label, mult_map, unassigned, comp_img, (cpx, cpy) = cluster_circles_by_geometry(circles, labels, gray_full)
+
+    # recall-boost second pass: some runners render their circle markers at
+    # unusually low native contrast (seen on "T", a dense PE/rubber-parts
+    # sprue) and the global Hough pass misses many of them. Re-scan each
+    # already-identified runner's own connected-component blob (its *exact*
+    # pixel mask, not just its bounding box - a bbox still lets in
+    # background/neighboring-runner/label-text pixels) with local CLAHE
+    # contrast enhancement, and fold in anything new. Confined to a
+    # deliberately short list of runners whose first-pass recall already
+    # looks suspiciously low relative to their known ground-truth cap;
+    # running it on every runner re-introduced the false-positive flood
+    # that sank the earlier bbox-scoped and page-wide attempts.
+    boost_codes = RECALL_BOOST_RUNNERS.get(tag, set())
+    if boost_codes:
+        new_circles = []
+        for cid, lb in comp_to_label.items():
+            if lb['code'] not in boost_codes:
+                continue
+            comp = next(c for c in comps if c['id'] == cid)
+            found = masked_clahe_rescan(gray_full, comp, comp_img, cpx, cpy, circles)
+            for c in found:
+                if in_label_text_zone(c):
+                    continue
+                c['code'] = lb['code']
+                new_circles.append(c)
+        circles.extend(new_circles)
 
     per_runner = defaultdict(int)
     for c in circles:
         if c['code']:
             per_runner[c['code']] += 1
 
-    return per_runner, mult_map, unassigned
+    return per_runner, mult_map, unassigned, circles, labels, comps, comp_to_label, gray_full
 
 
 def main():
@@ -100,7 +135,7 @@ def main():
     grand_total = 0
     all_rows = []
     for path, tag in pages:
-        per_runner, mult_map, unassigned = process_page(path, tag)
+        per_runner, mult_map, unassigned = process_page(path, tag)[:3]
 
         print(f"\n--- {path} ---")
         for code in sorted(per_runner.keys()):

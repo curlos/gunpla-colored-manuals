@@ -121,4 +121,4 @@ def cluster_circles_by_geometry(circles, labels, gray_full):
         if code is None:
             unassigned += 1
 
-    return comps, comp_to_label, mult_map, unassigned
+    return comps, comp_to_label, mult_map, unassigned, comp_img, (px, py)
