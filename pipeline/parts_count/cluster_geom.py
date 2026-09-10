@@ -25,6 +25,25 @@ def build_runner_components(gray_full, labels, min_area=5000):
         if cutoff > 0:
             ink[0:cutoff, :] = 0
 
+    # same problem, different shape: a page-bottom build note (e.g. "clear
+    # parts may have air bubbles...") can span nearly the full page width
+    # right below the last row of runners, and its ink bridges whichever
+    # runners it happens to sit under/near into one oversized shared blob
+    # (seen on p7: it pulled R1's component out to 659px wide, ~2x a normal
+    # runner, absorbing part of a neighbor along with it). Blank every
+    # label whose code never resolved (the header/footer/instruction text
+    # picked up by detect_labels but not matched to any runner code) -
+    # covers this and the header case above in one general rule; the
+    # explicit header-strip above stays as a fallback for header ink that
+    # extends beyond its own OCR'd text bbox.
+    for lb in labels:
+        if not lb['code'] or lb['code'] == 'X':
+            x0 = max(0, lb['box_l'] - px - 10)
+            y0 = max(0, lb['box_t'] - py - 10)
+            x1 = min(ink.shape[1], lb['box_r'] - px + 10)
+            y1 = min(ink.shape[0], lb['box_b'] - py + 10)
+            ink[y0:y1, x0:x1] = 0
+
     h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (80, 1))
     v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 80))
     h_lines = cv2.morphologyEx(ink, cv2.MORPH_OPEN, h_kernel)

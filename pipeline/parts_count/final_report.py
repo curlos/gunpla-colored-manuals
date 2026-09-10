@@ -33,10 +33,18 @@ DEFAULT_PAGES = [
 # Runners whose first-pass recall looked suspiciously low relative to their
 # known ground-truth cap - see the recall-boost note in process_page().
 RECALL_BOOST_RUNNERS = {
-    'p6': {'H', 'B2'},
-    'p7': set(),
+    'p6': {'H', 'B2', 'B1'},
+    'p7': {'R1'},
     'p8': {'T'},
 }
+
+# Runners where the boosted-candidate light_frac check (see
+# recall_boost2.masked_clahe_rescan's docstring) should be applied. Only
+# meaningful on a normal-contrast runner - on a low-native-contrast one
+# (e.g. "T") even its real digits show a high light_frac after CLAHE, so
+# thresholding there throws away genuine finds instead of false positives.
+LIGHT_FRAC_CHECK_RUNNERS = {'R1'}
+LIGHT_FRAC_MAX = 0.45
 
 
 def fix_labels(page_tag, valid_labels):
@@ -110,9 +118,25 @@ def process_page(path, tag):
             if lb['code'] not in boost_codes:
                 continue
             comp = next(c for c in comps if c['id'] == cid)
+            # a genuine number marker on this specific runner is never much
+            # bigger than the ones the (trustworthy) main pass already found
+            # on it - a boosted candidate noticeably larger than that is far
+            # more likely a plain round plastic part (a wheel/washer/disk,
+            # common on any runner) that CLAHE made pass the same fill-ratio
+            # circle test a real marker does. Seen concretely on B1: its
+            # already-found markers all top out at r=6.0, but the boost pass
+            # added several r=6.2-8.4 candidates that turned out to be plain
+            # beads, pushing the count past the runner's ground-truth cap.
+            existing_r = [c['r'] for c in circles if c['code'] == lb['code']]
+            max_r = (max(existing_r) + 1.0) if existing_r else 9.0
             found = masked_clahe_rescan(gray_full, comp, comp_img, cpx, cpy, circles)
             for c in found:
                 if in_label_text_zone(c):
+                    continue
+                if c['r'] > max_r:
+                    continue
+                if (lb['code'] in LIGHT_FRAC_CHECK_RUNNERS and
+                        c['light_frac'] is not None and c['light_frac'] > LIGHT_FRAC_MAX):
                     continue
                 c['code'] = lb['code']
                 new_circles.append(c)

@@ -50,9 +50,40 @@ def masked_clahe_rescan(gray_full, comp, comp_img, px, py, existing_circles):
         gx, gy = x + px + x0, y + py + y0
         if any(abs(gx - c['cx']) < 8 and abs(gy - c['cy']) < 8 for c in existing_circles):
             continue
+
+        # a real number marker has a digit cut into it: on a *normal-
+        # contrast* runner that's usually a fragmented, relatively small
+        # lighter region, while a plain round plastic part (ball joint,
+        # wheel, washer) that CLAHE also makes pass the dark-fill test above
+        # tends to have one big, simple, roughly circular lighter "hole"
+        # instead - calibrated against R1's false positives (0.49-1.00,
+        # commonly a single contour) vs its real digits (0.14-0.42, commonly
+        # 2+ fragmented contours). Measured on the raw (pre-CLAHE) crop,
+        # matching how it was calibrated - CLAHE's local contrast stretch
+        # changes this ratio enough to matter.
+        #
+        # NOT a universal signal, though: on a runner that's low-contrast
+        # in its *native* scan (e.g. "T"), even its real digits show a big
+        # light_frac after CLAHE stretches the whole circle's contrast, so
+        # this would wrongly reject them. It's returned on every candidate
+        # but left for the caller to decide whether to threshold on
+        # per-runner (see LIGHT_FRAC_CHECK_RUNNERS in final_report.py).
+        xi_n, yi_n = int(round(x)), int(round(y))
+        raw_sub = crop_full[max(0, yi_n - ri - 2):yi_n + ri + 2, max(0, xi_n - ri - 2):xi_n + ri + 2]
+        light_frac = None
+        if raw_sub.size > 0:
+            _, raw_dark = cv2.threshold(raw_sub, 190, 255, cv2.THRESH_BINARY_INV)
+            raw_light = 255 - raw_dark
+            lm = np.zeros(raw_sub.shape, dtype=np.uint8)
+            cv2.circle(lm, (raw_sub.shape[1] // 2, raw_sub.shape[0] // 2), max(1, int(ri * 0.85)), 255, -1)
+            light_in = cv2.bitwise_and(raw_light, lm)
+            circle_px = cv2.countNonZero(lm)
+            light_frac = cv2.countNonZero(light_in) / circle_px if circle_px else 0
+
         w = h = r * 2
         new_circles.append({
             'cx': float(gx), 'cy': float(gy), 'r': float(r), 'fill': fill,
+            'light_frac': light_frac,
             'x': int(gx - r), 'y': int(gy - r), 'w': int(w), 'h': int(h),
         })
     return new_circles
