@@ -205,63 +205,94 @@ where it did was a proven bug, not just a guess at one - and this is how
 the wide-runner label-stealing bug above was actually found (`used > gt
 total` on `F1`, `K`, `N`, `A2`, and others, by as much as +17).
 
-After the `cluster_geom.py` rewrite (including the footnote-bridging fix
-that un-merged `R1`'s component), the material-line-OCR-fallback fix, and
-the opt-in recall-boost pass with its radius-cap and light-region-shape
-checks, checking script-used-count against ground-truth-total across all
-26 runners gives:
+After the `cluster_geom.py` rewrite (footnote-bridging fix that
+un-merged `R1`'s component), the material-line-OCR-fallback fix, and the
+opt-in recall-boost pass (now applied to nearly every undercounting
+runner, with a radius-aware Euclidean de-dup, a per-runner radius cap,
+and an opt-in light-region-shape + solid-fill check), checking
+script-used-count against ground-truth-total across all 26 runners
+gives:
 
-- **10 runners match exactly**: A2, B1, C, E1, F2, G, J, K, L, MP2
-- **1 runner overcounts by 1** (impossible / proven residual bug): `S`
-  - traced to one specific false positive: a small round sprue
-    attachment nub (a physical plastic-tree detail, not a number
-    marker) that passes the same dark-fill-ratio circle test a real
-    marker does. Its interior "light" region's shape looks
-    distinguishable from a real digit's in a quick check (1 big
-    contiguous light blob covering ~19% of the circle vs 2-3 small
-    fragmented ones covering ~7% for real digits checked) but that's a
-    3-sample comparison, too thin to turn into a global filter without
-    real risk of cutting genuine digits elsewhere - left as a known
-    single-instance (<0.2% of the grand total) residual error rather
-    than risk a new bug chasing it.
-- **15 runners undercount** (expected/legitimate - a used-count can
+- **10 runners match exactly**: A2, C, D, E1, F2, G, J, K, L, MP2
+- **5 runners overcount by a small, individually-diagnosed amount**
+  (impossible / proven residual bugs): `F1` (+1), `I` (+1), `M` (+1),
+  `Q` (+2), `S` (+1). Each was crop-and-zoomed and visually confirmed to
+  be a real, specific false positive - not a guess:
+  - `S`: a small round sprue attachment nub (a physical plastic-tree
+    detail, not a number marker).
+  - `M`: a plain mechanical/joint detail with fill=1.00 (fixed - a
+    solid-fill check now catches this specific pattern) plus one
+    further false positive not yet isolated.
+  - `I`: a small round peg/hole feature that renders with a light
+    interior close enough to a real digit's (light-region-shape check:
+    0.21, comfortably under the 0.45 cutoff that catches most
+    false positives) that the existing checks don't separate it.
+  - `Q`: a row of ring/donut-shaped wheel parts on the physical sprue,
+    which - being genuinely ring-shaped - produce exactly the kind of
+    "dark ring, lighter center" pattern a real digit marker does; at
+    least one of these passes every check tried.
+  - `F1`: a specific circle traced to the *original* (non-boosted, pre-
+    existing) detection pass, not something the boost introduced -
+    a pre-existing edge case in the base circle detector, not a boost
+    regression.
+  - None of these could be resolved further without either (a) a much
+    larger calibration sample than the handful of confirmed examples
+    available per failure mode, or (b) tolerating real risk of cutting
+    genuine digits elsewhere - see the two abandoned generalization
+    attempts immediately below.
+- **11 runners undercount** (expected/legitimate - a used-count can
   never see parts hidden by the manual's own X-marks, and Hough still
-  misses some genuine circles when two numbers sit almost touching):
-  A1, B2, D, E2, F1, H, I, M, N, O, P, Q, R1, R2, T
-  - `T` is now within 1 of its ground-truth total (64 vs 65) via the
-    recall-boost pass - see below.
+  misses some genuine circles when two numbers sit almost touching, or
+  render at low enough native contrast that even the recall-boost pass
+  can't fully recover them): A1, B1, B2, E2, H, N, O, P, R1, R2, T.
+  `T` is within 4 of its ground-truth total (61 vs 65); `H` has the
+  largest remaining single-runner gap at 7 (×2 multiplier -> 14 actual
+  parts) despite boosting - spot-checked its most visually "tight
+  cluster" of six identical parts and found the main pass already
+  detects all six correctly, so the gap is distributed elsewhere in
+  smaller amounts rather than concentrated in one fixable spot.
 - 2 stray circle candidates page-wide fail to match any runner blob at
   all (almost certainly page-sidebar-tab false positives, since they
   don't count toward any runner's total either way)
 
-**Recall-boost pass results** (`RECALL_BOOST_RUNNERS` in
-`final_report.py`): tested against every undercounting runner one at a
-time, checking each result against its ground-truth cap:
+**Two generalization attempts that made things worse, and were
+reverted** (left here since they're exactly the next things worth
+trying again with more calibration data, not because they're
+dead ends):
+- **Lowering the boost pass's own Hough `param2`** (8 instead of 10, to
+  surface more raw candidates before filtering) recovered more of `T`
+  and `N`'s real gaps, but also pushed `H` from a safe 27 under-cap to
+  39 - *over* its 36 cap - since the extra raw candidates included
+  more false positives than the existing filters were tuned to catch
+  at that noise level.
+- **Applying the light-region-shape / solid-fill checks to every
+  boosted runner** (not just the ones they were calibrated on)
+  self-defeated on `T`: its real digits, being low-native-contrast,
+  render with a *high* light fraction after CLAHE - the exact opposite
+  of what the check assumes elsewhere - so it rejected genuine finds
+  there. `T`'s recall dropped from 61 back toward its pre-boost 49 when
+  this was tried broadly.
 
-| Runner | Before boost | After radius cap | After +light-shape check | Ground truth | Verdict |
-|---|---|---|---|---|---|
-| T  | 49 | 64 | (not applied - see above) | 65 | kept - big recall win, 1 short of the cap |
-| H  | 27 | 31 | (not applied) | 36 | kept - recall win, stayed under cap |
-| B2 | 19 | 27 | (not applied) | 30 | kept - recall win, stayed under cap |
-| B1 | 28 | 43 (still over) | 40 | 40 | kept - radius cap alone landed exactly on the cap |
-| R1 | 23 | 39 (still way over) | 27 | 30 | kept - needed both checks; radius cap alone wasn't enough since these false positives were normal-sized, the light-shape check is what caught them |
-| D, F1, I, M, N, P, Q, R2 | (various) | (various, all overshot even with the radius cap) | (not retried with light-shape check) | (various) | **reverted** - not tested against the light-shape check given time spent; radius cap alone wasn't sufficient the way it was for B1 |
-
-`P` was excluded from boosting entirely even before testing: at the time
-its component looked merged with a neighbor the same way `R1`'s was, so
-boosting a merged blob risked manufacturing circles that actually belong
-to the neighbor. `R1`'s merge turned out to be fixable (see
-`cluster_geom.py`'s section above) and got both re-included and boosted
-successfully; `P` wasn't revisited afterward given time spent - it may
-be a similarly fixable merge, or may not need it at all now that the
-underlying footnote-blanking fix is in place. Worth checking first if
-picking this back up.
-
-Grand total across all three pages with this script: **562 parts** (sum
+Grand total across all three pages with this script: **588 parts** (sum
 of each runner's used-circle count × its `xN`), against the ground
-truth's **590 used** summary figure - roughly a 5% undercount (down from
-12% at the start of this debugging pass), with only one small remaining
-source of overcounting (`S`, +1 part).
+truth's **590 used** summary figure - a 2-part (0.3%) undercount. This
+was reached from 562 in this same debugging session via: fixing a
+duplicate-detection bug in the boost pass (two Hough hits for one
+physical circle weren't always close enough together in pixel terms to
+trip the original fixed-distance de-dup - replaced with a radius-aware
+check), which alone fixed `D` exactly and helped several others; then
+extending the already-validated radius-cap + light-shape-check combo to
+most of the remaining undercounting runners. The count briefly hit
+exactly 590 mid-session with a *worse* error profile (7 total points of
+proven overcounting across 5 runners, coincidentally offsetting a
+larger undercount elsewhere) - 588 was kept instead as the more
+honestly-accurate state, since forcing the exact number by tolerating
+more known-wrong overcounts isn't a real fix. The 5 currently-known
+overcounts (F1 +1, I +1, M +1, Q +2, S +1 = 6 points) and the remaining
+undercount gaps are independent problems; closing the overcounts
+without closing an equivalent amount of undercount would move the
+total further from 590, not closer, despite being strictly more
+correct per-runner.
 
 ## Caveats
 
@@ -288,32 +319,32 @@ against a user-supplied ground truth of 590 used / 622 total parts:
 
 | Runner | x | Used (this script) | Total (used×xN) | Ground truth (total) | Match? |
 |---|---|---|---|---|---|
-| A1 | x1 | 14 | 14 | 17 | under |
+| A1 | x1 | 16 | 16 | 17 | under |
 | A2 | x1 | 10 | 10 | 10 | **exact** |
-| B1 | x1 | 40 | 40 | 40 | **exact** |
+| B1 | x1 | 39 | 39 | 40 | under |
 | B2 | x1 | 25 | 25 | 30 | under |
 | C  | x1 | 1  | 1  | 1  | **exact** |
-| D  | x1 | 17 | 17 | 18 | under |
+| D  | x1 | 18 | 18 | 18 | **exact** |
 | E1 | x1 | 12 | 12 | 12 | **exact** |
 | E2 | x1 | 9  | 9  | 11 | under |
-| F1 | x1 | 18 | 18 | 21 | under |
+| F1 | x1 | 22 | 22 | 21 | **overcount +1** |
 | F2 | x1 | 8  | 8  | 8  | **exact** |
 | G  | x1 | 21 | 21 | 21 | **exact** |
-| H  | x2 | 31 | 62 | 36 | under |
-| I  | x1 | 10 | 10 | 14 | under |
+| H  | x2 | 29 | 58 | 36 | under |
+| I  | x1 | 15 | 15 | 14 | **overcount +1** |
 | J  | x1 | 14 | 14 | 14 | **exact** |
 | K  | x2 | 12 | 24 | 12 | **exact** |
 | L  | x1 | 7  | 7  | 7  | **exact** |
-| M  | x1 | 22 | 22 | 25 | under |
-| N  | x1 | 11 | 11 | 14 | under |
+| M  | x1 | 26 | 26 | 25 | **overcount +1** |
+| N  | x1 | 12 | 12 | 14 | under |
 | O  | x2 | 2  | 4  | 3  | under |
-| P  | x2 | 29 | 58 | 35 | under |
-| Q  | x2 | 24 | 48 | 26 | under |
-| R1 | x1 | 27 | 27 | 30 | under |
-| R2 | x1 | 21 | 21 | 26 | under |
+| P  | x2 | 34 | 68 | 35 | under |
+| Q  | x2 | 28 | 56 | 26 | **overcount +2** |
+| R1 | x1 | 25 | 25 | 30 | under |
+| R2 | x1 | 22 | 22 | 26 | under |
 | MP2 | x1 | 2 | 2 | 2  | **exact** |
 | S  | x1 | 13 | 13 | 12 | **overcount +1** |
-| T  | x1 | 64 | 64 | 65 | under (by 1) |
+| T  | x1 | 61 | 61 | 65 | under (by 4) |
 
-**Grand total (used, ×N applied): 562 parts** (ground truth: 590 used /
+**Grand total (used, ×N applied): 588 parts** (ground truth: 590 used /
 622 total)

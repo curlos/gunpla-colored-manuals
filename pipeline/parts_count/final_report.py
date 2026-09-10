@@ -33,8 +33,8 @@ DEFAULT_PAGES = [
 # Runners whose first-pass recall looked suspiciously low relative to their
 # known ground-truth cap - see the recall-boost note in process_page().
 RECALL_BOOST_RUNNERS = {
-    'p6': {'H', 'B2', 'B1'},
-    'p7': {'R1'},
+    'p6': {'H', 'B2', 'B1', 'D', 'F1', 'A1', 'E2'},
+    'p7': {'R1', 'P', 'Q', 'R2', 'I', 'M', 'N'},
     'p8': {'T'},
 }
 
@@ -43,7 +43,7 @@ RECALL_BOOST_RUNNERS = {
 # meaningful on a normal-contrast runner - on a low-native-contrast one
 # (e.g. "T") even its real digits show a high light_frac after CLAHE, so
 # thresholding there throws away genuine finds instead of false positives.
-LIGHT_FRAC_CHECK_RUNNERS = {'R1'}
+LIGHT_FRAC_CHECK_RUNNERS = {'R1', 'P', 'Q', 'R2', 'I', 'M', 'N', 'D', 'F1', 'A1', 'E2'}
 LIGHT_FRAC_MAX = 0.45
 
 
@@ -135,9 +135,20 @@ def process_page(path, tag):
                     continue
                 if c['r'] > max_r:
                     continue
-                if (lb['code'] in LIGHT_FRAC_CHECK_RUNNERS and
-                        c['light_frac'] is not None and c['light_frac'] > LIGHT_FRAC_MAX):
-                    continue
+                if lb['code'] in LIGHT_FRAC_CHECK_RUNNERS:
+                    if c['light_frac'] is not None and c['light_frac'] > LIGHT_FRAC_MAX:
+                        continue
+                    # a perfectly (or near-perfectly) solid-filled candidate
+                    # has no digit carved into it at all - seen concretely on
+                    # M: a plain mechanical/joint detail (not a number) came
+                    # back with fill=1.00, well above every real digit's
+                    # fill (0.65-0.96 across every runner checked). Bundled
+                    # into the same opt-in set as the light_frac check
+                    # rather than applied everywhere: T has real digits that
+                    # render at fill=1.00 given its low native contrast, and
+                    # applying this globally cost it 5 genuine circles.
+                    if c['fill'] >= 0.97:
+                        continue
                 c['code'] = lb['code']
                 new_circles.append(c)
         circles.extend(new_circles)

@@ -48,7 +48,29 @@ def masked_clahe_rescan(gray_full, comp, comp_img, px, py, existing_circles):
         if fill < 0.63:
             continue
         gx, gy = x + px + x0, y + py + y0
-        if any(abs(gx - c['cx']) < 8 and abs(gy - c['cy']) < 8 for c in existing_circles):
+        # CLAHE can shift a re-detected circle's center by quite a bit more
+        # than the main pass's own 8px de-dup expects (the contrast stretch
+        # moves where the edge gradient peaks) - a fixed pixel cutoff can't
+        # cover this well, since it needs to scale with how big the circle
+        # actually is. Use a radius-aware check instead: two detections
+        # whose centers are closer together than roughly their combined
+        # radii can't be two separate physical circles side by side (real
+        # neighboring markers always have at least a small gap between
+        # them) - they're the same one found twice. Confirmed concretely on
+        # F1: a real "6" got detected once by the main pass and once by the
+        # boost pass, 17px apart center-to-center, both r=8.4 (so a fixed
+        # 13px cutoff missed it, but 17px sits almost exactly on
+        # r1+r2=16.8). Also checks against candidates already accepted *in
+        # this same rescan*, not just the main pass's list, since Hough can
+        # return two close hits for one physical circle within a single
+        # call too (seen on D: one real "8" detected 3 ways total).
+        is_dupe = False
+        for c in existing_circles + new_circles:
+            d = ((gx - c['cx']) ** 2 + (gy - c['cy']) ** 2) ** 0.5
+            if d < (r + c['r'] + 3):
+                is_dupe = True
+                break
+        if is_dupe:
             continue
 
         # a real number marker has a digit cut into it: on a *normal-
