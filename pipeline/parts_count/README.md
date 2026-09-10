@@ -348,3 +348,258 @@ against a user-supplied ground truth of 590 used / 622 total parts:
 
 **Grand total (used, ×N applied): 588 parts** (ground truth: 590 used /
 622 total)
+
+## Manual 403.pdf (HGUC 1/144 MSN-04 Sazabi) - total/used/unused
+
+A second manual, `manual.bandai-hobby.net/pdf/403.pdf` (HGUC 1/144 scale,
+not the MG/PG Ver.Ka kit above - a much smaller kit: 6 PDF pages total, one
+single-page Parts List, 7 lettered runners + one polycap bag). Unlike
+949.pdf, this run had no externally-supplied ground truth to check against,
+and needed a real **unused-part detector** built from scratch (949's
+session only ever used "unused" indirectly, as an upper-bound sanity
+check). Code lives in `manual_403/`, importing `cluster_geom.py` unchanged
+and reusing `detect_circles.py`/`detect_labels.py`'s `find_page_bbox`
+(updated - see below) but with its own tuned circle detector, label
+detector, and a new X-mark detector.
+
+### What's different about this manual's source page
+
+- **No grey margin.** 949.pdf's embedded spreads sit on a grey background,
+  so `find_page_bbox` finds the page as the largest bright connected
+  component. 403.pdf's embedded page image *is* the white page, edge to
+  edge (border pixels measure ~254-255) - the old blob approach actually
+  picks the *wrong* region on it (page content splits the white area into
+  many disconnected blobs; the largest one is a small blank patch, not the
+  whole page). Fixed generically in the shared `find_page_bbox` (both
+  copies, in `detect_circles.py` and `detect_labels.py`): if the image's
+  own border is already white, skip the blob search and use the full
+  image. Verified non-regressive by re-running `final_report.py` with no
+  args against 949.pdf's already-extracted `full/p06.png`/`p07.png`/
+  `p08.png` (still present in `/tmp/gunpla_parts/full/` at the time of this
+  check) - still reproduces the documented **588** exactly.
+- **Much higher native resolution.** A single-digit marker measures ~21px
+  diameter here vs 949's 11-17px, so the circle detector's radius range,
+  `minDist`, and Hough `param2` all needed re-tuning (see
+  `manual_403/detect_circles_403.py`).
+- **A different label style.** 949's label is one wide bordered box holding
+  the runner code, its kana name, and its `xN` multiplier together, with
+  the material line below as a separate OCR'd text line. 403's box is tiny
+  (~150x40px) and holds *only* the 1-letter runner code (e.g. `[A][パーツ]`)
+  - the `(xN)` multiplier (only on runners D and F here) and the material
+    line both sit as unboxed plain text beside/below it. Reused the same
+    *idea* (find the bordered box, erase its border, OCR it) but as fresh,
+    differently-tuned code in `manual_403/detect_labels_403.py`, not a
+    direct reuse of `detect_labels.py`.
+  - One label ("B" in this run) sometimes OCRs to complete garbage with no
+    letter at all. Since this page always has exactly 7 lettered runners
+    (A-G) in a fixed reading order, a single missing code is filled in by
+    elimination against the known A-G set rather than hand-fixed the way
+    949's `fix_labels()` hand-corrects specific misreads.
+  - The 8th "runner", `<PC-132AB>` (a polycap/poly-cap bag - not lettered),
+    uses a distinct bracket-style header with no box at all. It's the only
+    one of its kind on this page, so its label position is hardcoded in
+    `final_report_403.py` (`PC_LABEL`) rather than building general
+    bracket-header detection for a single instance.
+- **A clustering wrinkle unique to this page:** one label's multiplier
+  `(x2)` + material-line text sits close enough to the label itself to
+  form its own small (~105px-tall) connected-component blob that then won
+  the "closest below" label-to-blob match ahead of that runner's real,
+  much taller (~450px), content blob - same *class* of bug as 949's wide-
+  runner label-stealing, different trigger. Real runner-content blobs on
+  this page are consistently tall (292-542px); a `MIN_COMPONENT_HEIGHT` =
+  150 filter in `final_report_403.py` (applied to `cluster_geom`'s output,
+  not a change to `cluster_geom.py` itself) cleanly separates the two
+  populations.
+
+### Circle (used-part) detector calibration
+
+Tuned in `manual_403/detect_circles_403.py`:
+
+- `minRadius=9, maxRadius=12` (vs 949's 5-9): a first pass with a loose
+  8-15px range showed a clean bimodal radius histogram - real markers
+  cluster tightly at r=9.6-11.2px, and nearly all leftover false positives
+  (plain round plastic part details - ball joints, lenses, frame-
+  attachment nubs - that happen to be dark/solid enough to pass the fill
+  check) sit either above that (r=13.2-14.4) or a bit below (r=8.4-8.8).
+  Tightening the search range removes most of them for free.
+- `FILL_CUTOFF = 0.58` (0.60 was tried first, matching a histogram valley
+  computed at loose radius with no content-area cutoff, mirroring exactly
+  how 949's 0.63 cutoff was chosen - but a full visual audit, crop-and-
+  zoom every runner against a hand-recount, found 4 genuine digit circles
+  sitting right at fill 0.58-0.60 that 0.60 excluded: two 2-digit numbers
+  on C ("10", "14") and one each on A and G. All 4 confirmed real by
+  inspecting the source crop directly, not assumed. Lowering to 0.58
+  recovers exactly those 4 with no new false positives; 0.55 was also
+  tried and starts pulling in real false positives too (one is literally
+  the same "+"-shaped sprue-frame bar junction the X-mark detector had to
+  filter out below), so 0.58 is treated as the floor, not a
+  round-number guess.
+- `SOLID_FILL_REJECT = 0.97`: reuses 949's own precedent exactly (its
+  README documents this for runner "M") - a candidate with essentially no
+  light pixels at all has no digit cut into it, so it can't be a real
+  marker. Caught one page-footer bullet-point glyph (harmless either way,
+  since nothing assigns it to a runner - see "Unassigned" below) and one
+  genuine false positive on runner E (a solid grey frame-attachment nub,
+  fill=1.00 exactly, crop-confirmed).
+- `CONTENT_TOP_Y = 900`: this page's top ~900px is entirely the safety-
+  warning header and the pictogram legend (scissors/glue/×2/rotate icons,
+  etc.), not any runner's parts - and several legend pictograms contain
+  genuine solid black circles ("build this first" / "build this later"
+  icons) that would otherwise false-positive. Since no runner's real
+  content starts above this line, the whole zone is excluded outright.
+
+**Known remaining false positives/negatives (individually diagnosed by
+crop-and-zoom, the same discipline 949's README used for its own S/M/I/Q
+cases)** - none resolved further, for the same reason 949's weren't:
+doing so risks cutting genuine digits elsewhere with no larger calibration
+sample to check against:
+- **G: 4 false positives.** Two pairs of plain, unlabeled round plastic
+  parts (ball-joint-style pieces) directly below runner G's "7" and "8"
+  circles pass the same Hough+fill test a real digit marker does - visually
+  confirmed via crop (no digit inside, no adjacent number label). Fill
+  values (0.79, 0.95, 0.735, 0.946) span across and beyond the range real
+  digits on this runner use, so no fill-only cutoff separates them cleanly
+  without also risking real digits elsewhere.
+- **G: 1 false negative.** A second "18" digit sitting immediately next to
+  a "19" measures fill=0.5685 - just under the 0.58 cutoff, and tied
+  almost exactly with a known false positive (the D frame-junction below)
+  at fill=0.569, so there is no safe threshold that recovers it without
+  also admitting that false positive.
+- **D: 1 false negative.** The "12" digit sits where a sprue-frame bar
+  physically crosses behind its circle, measuring fill=0.569 - again just
+  under cutoff, crop-confirmed as a genuine digit, not noise.
+- Net effect if these are hand-corrected: D used 15->16, G used 40->37.
+  See the results table below for both the raw script output and this
+  corrected estimate.
+- One additional circle-shaped candidate (a `●` bullet point in the page
+  footer, fill=1.00) is correctly excluded by `SOLID_FILL_REJECT` and, even
+  if it weren't, would land outside every runner's component blob and stay
+  unassigned either way.
+
+### X-mark (unused-part) detector - new for this manual
+
+403.pdf's Parts List header explicitly states the convention:
+`（×印は使用しないパーツです。）` ("the × mark means this part isn't used").
+After visually inspecting every runner on this page (same crop-and-zoom
+discipline as everything else here), there turns out to be exactly **one**
+visual style of it on this particular manual: a small bare "×" glyph, no
+circle around it, sitting immediately next to the last circled instance of
+a repeated part number - found twice, both on the `<PC-132AB>` polycap
+runner. No other runner has any × mark, and 949.pdf's second style (a large
+× drawn across an entire molded part's outline) does not appear anywhere
+on this page either.
+
+Two more general approaches were tried and abandoned before landing on the
+final design (both documented, separately, in 949's own README as having
+been tried there too, for the same reasons - this session hit the same
+wall independently):
+
+1. **Plain contour circularity/fill, scanned over the whole page.**
+   Sampling the two known real × marks gives a clean-looking signature in
+   isolation (fill~0.21-0.23, circularity~0.10). But scanning the entire
+   content area (same `CONTENT_TOP_Y` cutoff as the circle detector) for
+   anything of similar bounding-box size (14-30px) and a loose version of
+   that signature turns up **87** candidates. Almost all are either (a) a
+   real number circle's own inner digit-stroke contour - `cv2.findContours`
+   with `RETR_LIST` returns the digit glyph as its own separate,
+   low-circularity contour nested inside the circle's outer boundary,
+   centered almost exactly on an already-detected circle - or (b) ordinary
+   sprue-diagram line art (a right-angle frame-bar junction, a molded
+   part's corner, Kanji strokes in the material-composition text) that
+   happens to land in the same size/fill/circularity band.
+2. **Requiring proximity to a real circle, excluding a candidate that's
+   just that circle's own digit stroke.** This page's actual convention -
+   the × sits right where the *next* circled instance in a repeating
+   sequence would otherwise go - makes this a strong filter: down to **3**
+   candidates page-wide (the 2 real marks, both ~25-28px from the nearest
+   circle, plus exactly one leftover false positive on D at almost the
+   same distance: a right-angle "+"-shaped sprue-frame bar junction next to
+   D's 10/11/12 circles). Distance alone can't separate a real × that's
+   28px from a circle from a frame junction that's also 28px from one.
+
+The feature that actually closes the gap: an "×" is two *diagonal*
+crossing strokes; a sprue-frame bar junction is two strokes at 0/90
+degrees, even though both have near-identical bounding-box size, fill, and
+circularity. Binning each candidate's dark pixels (in its own padded bbox,
+normalized to [-1, 1]) into a "near either diagonal" band vs a "near either
+central axis" band gives a clean, wide-margin split:
+
+| | diag_score | axis_score |
+|---|---|---|
+| real × marks (both) | 0.97-1.00 | 0.33-0.34 |
+| the D frame-junction | 0.58 | 0.65 |
+
+Final pipeline (`manual_403/xmark_detector_403.py`): contour fill/circularity
+prefilter -> exclude a candidate that's really just the nearest circle's own
+digit stroke -> require it sit inside a real runner's own connected-
+component blob (reuses the same clustering as circle-to-runner assignment -
+this alone excludes the header, legend, labels, and material-line text) ->
+cap distance to the nearest circle at 40px -> the diagonal-vs-axis stroke
+check. This lands on exactly the 2 real × marks with a wide margin on every
+threshold used.
+
+**Confidence caveat, stated plainly:** this detector has only ever been
+calibrated against 2 known positives and 1 known false positive - the
+smallest calibration set of anything in this pipeline. It works cleanly on
+this page, but there was no opportunity to stress-test it against a wider
+variety of × mark renderings the way the circle detector's fill cutoff was
+checked against dozens of real digits. If you run this against a different
+manual (or a page where × marks appear anywhere other than immediately
+beside a circle in a repeating sequence), treat this module as a starting
+point to recalibrate, not as a validated general solution - it has NOT been
+checked against 949.pdf's own × conventions (the small-icon style or the
+large-crossed-out-part-outline style) at all.
+
+### Results
+
+Raw script output vs. a crop-and-zoom-corrected estimate (see the "Known
+remaining false positives/negatives" note above for exactly what's being
+corrected and why - D and G are the only two runners where they differ):
+
+| Runner | × | Used (script) | Used (corrected) | Unused | Total (corrected, ×N applied) |
+|---|---|---|---|---|---|
+| A  | x1 | 22 | 22 | 0 | 22 |
+| B  | x1 | 3  | 3  | 0 | 3 |
+| C  | x1 | 16 | 16 | 0 | 16 |
+| D  | x2 | 15 | 16 | 0 | 32 |
+| E  | x1 | 13 | 13 | 0 | 13 |
+| F  | x2 | 19 | 19 | 0 | 38 |
+| G  | x1 | 40 | 37 | 0 | 37 |
+| PC-132AB | x1 | 19 | 19 | 2 | 21 |
+
+**Grand totals (corrected estimate):**
+- **Total parts: 182**
+- **Used parts: 180**
+- **Unused parts: 2** (both on `<PC-132AB>`)
+
+Raw, uncorrected script output (`final_report_403.py`): 183 total (181
+used + 2 unused) - a 1-part difference from the corrected estimate above,
+entirely explained by the D/G discrepancies documented above (+1 on D from
+the hand-corrected miss, -3 net on G from 4 hand-corrected false positives
+minus 1 hand-corrected miss).
+
+### Caveats specific to this manual
+
+- **There is no externally-supplied ground truth for this kit**, unlike
+  949.pdf's user-supplied 590/622 table. The "corrected" numbers above come
+  from this session's own crop-and-zoom visual audit of every runner on
+  the page, cross-checked in places against raw connected-component
+  pixel-blob counts (used to catch a real error in an earlier, purely
+  by-eye tally of `<PC-132AB>` - a first manual count called it 18 used,
+  but both the detector and a blob-area recount independently agreed on
+  19; the by-eye tally had simply miscounted a dense 20-position grid).
+  Treat the numbers in this section as carefully self-checked, not
+  independently certified - if you have or can get Bandai's own or a
+  community-sourced used/unused count for this exact kit, trust that over
+  this document.
+- Every threshold in `manual_403/` (`detect_circles_403.py`,
+  `xmark_detector_403.py`) was tuned against this one page's specific scan
+  resolution and layout, the same way 949's thresholds were - re-verify
+  with a debug overlay (`detect_circles_403.py page.png debug.png`) before
+  trusting it against a different manual, even another HGUC-scale one.
+- The X-mark detector's calibration set (2 positives, 1 negative) is
+  small - see its confidence caveat above.
+- `fix`-style corrections here (the by-elimination missing-label fill-in,
+  the `PC_LABEL` hardcode, `MIN_COMPONENT_HEIGHT`) only affect how circles
+  are grouped/labeled, never which circles are detected in the first
+  place - same separation of concerns as 949's `fix_labels()`.
