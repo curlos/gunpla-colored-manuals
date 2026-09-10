@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+venv/
+pipeline/parts_count/manual_403/full/
+pipeline/parts_count/manual_403/debug/

@@ -4,6 +4,24 @@ import sys
 
 
 def find_page_bbox(gray):
+    """Locate the white page area within the source image.
+
+    949.pdf's embedded spreads have visible grey margin around the white
+    page, so the page is found as the largest bright connected component.
+    403.pdf's embedded page image has NO grey margin at all - the raw
+    image *is* already exactly the white page, edge to edge (border pixels
+    are ~254-255). In that case the "largest bright blob" approach
+    actually picks the wrong thing (the page content, e.g. runner
+    diagrams/text, fragments the white area into many disconnected
+    regions, so the largest single blob can be a small blank patch, not
+    the whole page) - detected by checking the image border like this
+    across both manuals. If the border is already essentially white,
+    skip the blob search and just use the full image.
+    """
+    h, w = gray.shape
+    edge = min(gray[:5, :].min(), gray[-5:, :].min(), gray[:, :5].min(), gray[:, -5:].min())
+    if edge > 245:
+        return 0, 0, w, h
     _, bright = cv2.threshold(gray, 235, 255, cv2.THRESH_BINARY)
     n, labels, stats, centroids = cv2.connectedComponentsWithStats(bright, connectivity=8)
     idx = np.argmax(stats[1:, cv2.CC_STAT_AREA]) + 1

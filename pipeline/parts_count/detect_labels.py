@@ -9,6 +9,14 @@ MATERIAL_CODES = {'PS', 'PE', 'ABS', 'PP', 'PC', 'POM', 'PVC'}
 
 
 def find_page_bbox(gray):
+    """See detect_circles.find_page_bbox (duplicated here to avoid a cross
+    import) - falls back to the full image when the border is already
+    white (403.pdf has no grey margin around its embedded page image,
+    unlike 949.pdf)."""
+    h, w = gray.shape
+    edge = min(gray[:5, :].min(), gray[-5:, :].min(), gray[:, :5].min(), gray[:, -5:].min())
+    if edge > 245:
+        return 0, 0, w, h
     _, bright = cv2.threshold(gray, 235, 255, cv2.THRESH_BINARY)
     n, labels, stats, centroids = cv2.connectedComponentsWithStats(bright, connectivity=8)
     idx = np.argmax(stats[1:, cv2.CC_STAT_AREA]) + 1
