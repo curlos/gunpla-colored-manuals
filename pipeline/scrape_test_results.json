@@ -1,0 +1,82 @@
+[
+  {
+    "brand": "Bandai",
+    "name": "MG Gundam Vidar",
+    "price": "66.00",
+    "nutrition_facts": {
+      "Serving Size": "907g",
+      "Scale": "1/100",
+      "Line": "MG - Master Grade",
+      "Brand": "Mobile Suit Gundam",
+      "Series": "Iron-Blooded Orphans",
+      "Release Date": "April 2025",
+      "SKU": "2745391"
+    },
+    "manual_url": "https://manual.bandai-hobby.net/pdf/2938.pdf",
+    "source_url": "https://newtype.us/p/7wdBCVIt2hZpU2U3eykG/h/mg-gundam-vidar"
+  },
+  {
+    "brand": "Bandai",
+    "name": "HGUC 261 MRX-010 Psycho Gundam Mk-II",
+    "price": "109.99",
+    "nutrition_facts": {
+      "Serving Size": "1814g",
+      "Scale": "1/144",
+      "Line": "HG - High Grade",
+      "Number": "261/265",
+      "Brand": "Mobile Suit Gundam",
+      "Series": "Zeta Gundam",
+      "Release Date": "April 2025",
+      "SKU": "2745406"
+    },
+    "manual_url": "https://manual.bandai-hobby.net/pdf/2939.pdf",
+    "source_url": "https://newtype.us/p/vF8h56Z4GQEwS7XbiROX/h/hguc-261-mrx-010-psycho-gundam-mk-ii"
+  },
+  {
+    "brand": "Bandai",
+    "name": "MG MSN-04 Sazabi Ver.Ka",
+    "price": "117.00",
+    "nutrition_facts": {
+      "Serving Size": "1656g",
+      "Scale": "1/100",
+      "Line": "MG - Master Grade",
+      "Brand": "Mobile Suit Gundam",
+      "Series": "Char's Counterattack",
+      "SKU": "2204932"
+    },
+    "manual_url": "https://manual.bandai-hobby.net/pdf/949.pdf",
+    "source_url": "https://newtype.us/p/JrEORIMXexqgEmiOTtnX/h/mg-msn-04-sazabi-verka"
+  },
+  {
+    "brand": "Bandai",
+    "name": "MG GN-005 Gundam Virtue",
+    "price": "91.00",
+    "nutrition_facts": {
+      "Serving Size": "1361g",
+      "Scale": "1/100",
+      "Line": "MG - Master Grade",
+      "Brand": "Mobile Suit Gundam",
+      "Series": "Gundam 00",
+      "SKU": "2553523"
+    },
+    "manual_url": "https://manual.bandai-hobby.net/pdf/644.pdf",
+    "source_url": "https://newtype.us/p/Qk1wgMICQffG5UlLTyfD/h/mg-gn-005-gundam-virtue"
+  },
+  {
+    "brand": "Bandai",
+    "name": "HGCE 260 ZGMF-MM07 Z'Gok",
+    "price": "40.00",
+    "nutrition_facts": {
+      "Serving Size": "549g",
+      "Scale": "1/144",
+      "Line": "HG - High Grade",
+      "Number": "260/265",
+      "Brand": "Mobile Suit Gundam",
+      "Series": "Gundam Seed Freedom",
+      "Release Date": "April 2025",
+      "SKU": "2750722"
+    },
+    "manual_url": "https://manual.bandai-hobby.net/pdf/2667.pdf",
+    "source_url": "https://newtype.us/p/mbEMOxR6ZciUuZa5UM39/h/hgce-260-zgmf-mm07-z-gok"
+  }
+]

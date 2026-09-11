@@ -1,0 +1,223 @@
+{
+  "kit": "MG 1/100 MSN-06S Sinanju",
+  "source_pdf": "https://manual.bandai-hobby.net/pdf/610.pdf",
+  "generated": "2026-09-10",
+  "method": "Manually cross-referenced (direct visual reading, not OCR/automated): (1) runner molded colors from the Parts List page (PDF p.3), (2) which runner+part-number callouts appear in which assembly step/section across the full instruction sequence (PDF pp.4-13, steps 1-16), and (3) the kit's PAINTING guide categories (PDF p.8, MSN-06S section only - the separate Full Frontal FIGURE paint guide on the same page is excluded on purpose per the user's request). A runner is mapped to a painting_guide category only when its parts were directly observed being used in that category's physical region of the model.",
+  "not_covered": "This maps color/paint INTENT, not shape/geometry - it does not identify which pixels/contours in a diagram belong to which part. That would be a separate part-shape-isolation step.",
+
+  "painting_guide_categories": {
+    "body": {
+      "label_ja": "本体などの塗装色",
+      "label_en": "Body, etc.",
+      "formula": "Monza Red (65%) + Red (30%) + White (5%)"
+    },
+    "weapon": {
+      "label_ja": "武器などの塗装色",
+      "label_en": "Weapons, etc.",
+      "formula": "Navy Blue (70%) + Dark Green (30%)"
+    },
+    "thruster_yellow": {
+      "label_ja": "スラスターなどイエロー部の塗装色",
+      "label_en": "Thrusters, etc. (yellow parts)",
+      "formula": "White (70%) + Orange Yellow (30%) + Orange (small amount)"
+    },
+    "joint": {
+      "label_ja": "関節などの塗装色",
+      "label_en": "Joints, etc.",
+      "formula": "Gray (90%) + Black (10%)"
+    },
+    "sensor": {
+      "label_ja": "センサーなどの塗装色",
+      "label_en": "Sensors, etc.",
+      "formula": "Clear (70%) + Clear Blue (20%) + Clear Yellow (10%)"
+    },
+    "bazooka_dark": {
+      "label_ja": "ロケット・バズーカの塗装色",
+      "label_en": "Rocket Bazooka",
+      "formula": "Gray (85%) + Black (10%) + Purple (5%)"
+    },
+    "chest": {
+      "label_ja": "胸などの塗装色",
+      "label_en": "Chest, etc.",
+      "formula": "Midnight Blue (100%)"
+    },
+    "trim_gold": {
+      "label_ja": "袖、胸など装飾部の塗装色",
+      "label_en": "Sleeves, chest, other decorative parts",
+      "formula": "Gold (85%) + Clear Yellow (15%)"
+    },
+    "bazooka_light": {
+      "label_ja": "ロケット・バズーカ、ライトグレー部の塗装色",
+      "label_en": "Rocket Bazooka, light gray parts",
+      "formula": "White (70%) + Gray (30%) + Purple (small amount)"
+    }
+  },
+
+  "runners": {
+    "A": {
+      "molded_color_ja": "ブラック",
+      "molded_color_en": "Black",
+      "runner_count": 1,
+      "observed_in_sections": ["HEAD (2, 2-1)", "BODY (1-1, 1-3, 1-6, 1-8)", "WAIST/BOTTOM (8-3, 8-4, 8-5, 9)", "LEGS (6-3, 6-4, 6-7, 6-9, 7-2)", "SHIELD (13-2)"],
+      "example_parts": ["A1 (shield spike)", "A7", "A12-A21"],
+      "painting_guide_category": "chest",
+      "confidence": "medium",
+      "note": "Black is used for small spike/vent/accent shapes across nearly every section (head, body, arms, legs, shield), not one localized area. 'chest' (Midnight Blue, ~black) is the only near-black formula in the guide, so it's the best-fit existing recipe for all of A's parts, but Bandai doesn't explicitly say 'use this on A-runner parts' - this is an inference from color proximity."
+    },
+    "B": {
+      "molded_color_ja": "イエロー",
+      "molded_color_en": "Yellow",
+      "runner_count": 1,
+      "observed_in_sections": ["UPPER BODY (5-2, 5-3)", "LEGS (6-7)", "WAIST/BOTTOM (8-3, 8-4, 9)"],
+      "example_parts": ["B1-B5", "B6, B7", "B8-B11"],
+      "painting_guide_category": "thruster_yellow",
+      "confidence": "high",
+      "note": "Small yellow accent parts recur at multiple joint/vent locations (upper body, legs, waist) - consistent with the guide's single 'thruster/yellow parts' formula being used kit-wide wherever yellow accents appear, not just the backpack thrusters."
+    },
+    "C": {
+      "molded_color_ja": "クリアグリーン",
+      "molded_color_en": "Clear Green",
+      "runner_count": 1,
+      "observed_in_sections": ["BODY (1-1, cockpit hatch)", "BEAM RIFLE (12-1, scope lens)"],
+      "example_parts": ["C1, C2", "C3, C4"],
+      "painting_guide_category": "sensor",
+      "confidence": "high",
+      "note": "Directly confirmed: used for both the cockpit hatch/head sensor and the rifle scope lens - matches the guide's 'sensor' category exactly (translucent clear/blue/yellow green mix)."
+    },
+    "D": {
+      "molded_color_ja": "レッド",
+      "molded_color_en": "Red",
+      "runner_count": 1,
+      "has_undergate": true,
+      "observed_in_sections": ["HEAD (2-2)", "WAIST/BOTTOM (8-2, 8-3, 8-4, 8-5, 8-6)", "BACK PACK (10-2)", "BODY ASSEMBLE (11-2)"],
+      "example_parts": ["D1-D26"],
+      "painting_guide_category": "body",
+      "confidence": "high",
+      "note": "Outer armor-shell parts across head/waist/body - the kit's main red color, matches 'body' category directly."
+    },
+    "E": {
+      "molded_color_ja": "レッド",
+      "molded_color_en": "Red",
+      "runner_count": 1,
+      "observed_in_sections": ["ARMS (3-5, 4)", "LEGS (6-8, 6-9, 7-1, 7-2)", "SHIELD (13-1)"],
+      "example_parts": ["E1-E19"],
+      "painting_guide_category": "body",
+      "confidence": "high",
+      "note": "Outer armor-shell parts for arms/legs/shield - same red as D, same category."
+    },
+    "F": {
+      "molded_color_ja": "レッド",
+      "molded_color_en": "Red",
+      "runner_count": 2,
+      "observed_in_sections": ["ARMS (3-3, 3-4)", "UPPER BODY (5-1, 5-2, 5-3)", "BACK PACK (10-3)", "WEAPON EQUIPMENT (16-2)"],
+      "example_parts": ["F1-F20"],
+      "painting_guide_category": "body",
+      "confidence": "high",
+      "note": "Outer armor-shell parts for arms/shoulders/upper body - same red category as D/E."
+    },
+    "G": {
+      "molded_color_ja": "レッド",
+      "molded_color_en": "Red",
+      "runner_count": 2,
+      "observed_in_sections": ["LEGS (6-4, 6-6, 6-7, 6-8, 7-1)", "UPPER BODY (6-6)"],
+      "example_parts": ["G1-G15"],
+      "painting_guide_category": "body",
+      "confidence": "high",
+      "note": "Outer armor-shell parts for legs/thighs - same red category as D/E/F."
+    },
+    "H": {
+      "molded_color_ja": "グレー",
+      "molded_color_en": "Gray",
+      "runner_count": 2,
+      "observed_in_sections": ["BODY (1-7, pipe/cable segments, x8)", "WAIST (8-7, pipe/cable segments, x8)", "BACK PACK (10-2)", "BOTTOM (9)"],
+      "example_parts": ["H1 x8", "H2 x8", "H3-H9"],
+      "painting_guide_category": "joint",
+      "confidence": "high",
+      "note": "Small connector/pipe-segment parts feeding into the flexible cable/pipe-spring assemblies - internal frame hardware, matches 'joint' category."
+    },
+    "I": {
+      "molded_color_ja": "ホワイト",
+      "molded_color_en": "White",
+      "runner_count": 2,
+      "observed_in_sections": ["BACK PACK (10-1, 10-3) - the large wing-like thruster tube housings"],
+      "example_parts": ["I1-I4"],
+      "painting_guide_category": null,
+      "confidence": "none",
+      "note": "NO dedicated category exists in the official painting guide for this. I-parts are exclusively the big backpack thruster tube shells. The closest formula by ingredient overlap is 'bazooka_light' (White 70% + Gray 30% + Purple, small amount), since it's also white-based, but that's a guess by color similarity, not a documented Bandai recommendation - do not treat as confirmed."
+    },
+    "J": {
+      "molded_color_ja": "グレー",
+      "molded_color_en": "Gray",
+      "runner_count": 1,
+      "observed_in_sections": ["BEAM RIFLE (12-1, 12-2, 12-3) - entire rifle body/mechanism", "WEAPON EQUIPMENT (16-x, mount hardware)"],
+      "example_parts": ["J1-J18"],
+      "painting_guide_category": "weapon",
+      "confidence": "high",
+      "note": "Used exclusively for the beam rifle body and its mounting hardware - directly matches the guide's 'weapon' (Navy Blue + Dark Green) category, distinct from the plain gray joint frame."
+    },
+    "K": {
+      "molded_color_ja": "グレー",
+      "molded_color_en": "Gray",
+      "runner_count": 1,
+      "observed_in_sections": ["BODY (1-1 through 1-8, core frame)", "WAIST (8-1 through 8-7)", "BEAM AXE (14-1, 14-2, handle joint)"],
+      "example_parts": ["K1-K32"],
+      "painting_guide_category": "joint",
+      "confidence": "high",
+      "note": "The core inner-frame/joint runner for body and waist, plus the axe's handle joint mechanism - consistent with 'joint' category throughout."
+    },
+    "L": {
+      "molded_color_ja": "グレー",
+      "molded_color_en": "Gray",
+      "runner_count": 1,
+      "observed_in_sections": ["HEAD (2-1, 2-2)", "ARMS (3-5, 4)", "SHIELD (13-1, 13-2)", "BACK PACK (10-2)"],
+      "example_parts": ["L1-L29"],
+      "painting_guide_category": "joint",
+      "confidence": "high",
+      "note": "Inner-frame/joint parts for head, arms, and the shield's mounting frame - matches 'joint' category."
+    },
+    "M": {
+      "molded_color_ja": "グレー",
+      "molded_color_en": "Gray",
+      "runner_count": 2,
+      "observed_in_sections": ["ARMS (3-1 through 3-4)", "UPPER BODY (5-1, 5-2, 5-3)", "BACK PACK (10-3)", "BEAM AXE (14-1, 14-2, blade/holder)"],
+      "example_parts": ["M1-M31"],
+      "painting_guide_category": "joint",
+      "confidence": "high",
+      "note": "Inner-frame/joint parts for arms/upper body/backpack, plus the beam axe's blade-holder mechanism - matches 'joint' category."
+    },
+    "N": {
+      "molded_color_ja": "グレー",
+      "molded_color_en": "Gray",
+      "runner_count": 2,
+      "observed_in_sections": ["LEGS (6-1 through 6-9, 7-1, 7-2) - entire leg inner frame"],
+      "example_parts": ["N1-N30"],
+      "painting_guide_category": "joint",
+      "confidence": "high",
+      "note": "The leg inner-frame/joint runner - matches 'joint' category."
+    },
+    "O": {
+      "molded_color_ja": "クリアイエロー",
+      "molded_color_en": "Clear Yellow",
+      "runner_count": 2,
+      "observed_in_sections": ["WEAPON EQUIPMENT (16-2 through 16-7) - large fin/blade-shaped attachment, likely the long-range sensor/effect part"],
+      "example_parts": ["O1-O3"],
+      "painting_guide_category": null,
+      "confidence": "none",
+      "note": "NO dedicated category in the painting guide. This is a distinct translucent yellow effect/optic part, different from both the opaque 'thruster_yellow' formula and the clear-GREEN 'sensor' formula - neither is a documented match. Left unmapped rather than guessed."
+    },
+    "P": {
+      "molded_color_ja": "グレー",
+      "molded_color_en": "Gray",
+      "runner_count": 1,
+      "observed_in_sections": ["BAZOOKA (15-1 through 15-5) - entire bazooka body", "WEAPON EQUIPMENT (16-x, bazooka grip/stock hardware)"],
+      "example_parts": ["P1-P23"],
+      "painting_guide_category": ["bazooka_dark", "bazooka_light"],
+      "confidence": "medium",
+      "note": "Used exclusively for the bazooka. The guide gives TWO bazooka formulas (main dark gray + 'light gray part'), and the assembly diagrams don't call out which individual P-number is which shade - that distinction is a painter's judgment call by looking at the finished-kit photo, not something in the numbered instructions. Both categories apply somewhere within the P-parts group; this mapping can't resolve it further at the individual-part level from the manual alone."
+    }
+  },
+
+  "unmapped_categories": {
+    "trim_gold": "No runner is molded gold. The 'sleeve/chest decorative' gold trim (label_en: trim_gold) is achieved via the kit's accessory stickers/decals (カラーシール/ガンダムデカール/マーキングシール, listed on the Parts List page) and/or hand-painting over red/black parts - not a distinct plastic runner."
+  }
+}

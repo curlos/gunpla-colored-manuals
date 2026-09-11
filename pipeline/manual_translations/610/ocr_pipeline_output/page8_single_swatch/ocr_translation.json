@@ -1,0 +1,35 @@
+[
+  {
+    "text_ja": "本体などの塗装色",
+    "confidence": 89.2,
+    "bbox": [
+      371,
+      45,
+      767,
+      122
+    ],
+    "text_en": "Paint color of main body etc."
+  },
+  {
+    "text_ja": "モンザレッド(659%%)",
+    "confidence": 87.2,
+    "bbox": [
+      372,
+      107,
+      814,
+      179
+    ],
+    "text_en": "Monza Red (659%%)"
+  },
+  {
+    "text_ja": "+レッド(3096)+ホワイト(596)ー",
+    "confidence": 82.6,
+    "bbox": [
+      371,
+      167,
+      1409,
+      237
+    ],
+    "text_en": "+Red (3096)+White (596)-"
+  }
+]

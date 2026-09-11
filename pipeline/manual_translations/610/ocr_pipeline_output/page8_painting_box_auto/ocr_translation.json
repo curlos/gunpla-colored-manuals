@@ -1,0 +1,1010 @@
+[
+  {
+    "text_ja": "BB",
+    "confidence": 10.0,
+    "bbox": [
+      406,
+      0,
+      615,
+      7
+    ],
+    "text_en": "BB",
+    "region": 0
+  },
+  {
+    "text_ja": "IEああ、BELaELLJ",
+    "confidence": 15.3,
+    "bbox": [
+      650,
+      0,
+      1020,
+      9
+    ],
+    "text_en": "IE AH, BELaELLJ",
+    "region": 1
+  },
+  {
+    "text_ja": "※男像はイメージです。",
+    "confidence": 78.2,
+    "bbox": [
+      2173,
+      7,
+      2386,
+      37
+    ],
+    "text_en": "*The male figure is an image.",
+    "region": 2
+  },
+  {
+    "text_ja": "PAINTING(",
+    "confidence": 16.5,
+    "bbox": [
+      428,
+      64,
+      999,
+      142
+    ],
+    "text_en": "Painting (",
+    "region": 4
+  },
+  {
+    "text_ja": "本体などの塗装色",
+    "confidence": 85.3,
+    "bbox": [
+      636,
+      173,
+      834,
+      205
+    ],
+    "text_en": "Painting colors such as the main body",
+    "region": 4
+  },
+  {
+    "text_ja": "モンザレッド(6596)",
+    "confidence": 92.2,
+    "bbox": [
+      636,
+      206,
+      856,
+      230
+    ],
+    "text_en": "Monzaled (6596)",
+    "region": 4
+  },
+  {
+    "text_ja": "+ォレッド(3096)+ホワイト(59%6)",
+    "confidence": 66.2,
+    "bbox": [
+      636,
+      234,
+      983,
+      263
+    ],
+    "text_en": "+ Voled (3096) + White (59% 6)",
+    "region": 4
+  },
+  {
+    "text_ja": "TIN(塗装",
+    "confidence": 59.5,
+    "bbox": [
+      651,
+      64,
+      1076,
+      142
+    ],
+    "text_en": "Tin (Painting",
+    "region": 5
+  },
+  {
+    "text_ja": "よりリアルに仕上けたい方は、下の基本色をご発くたさい。",
+    "confidence": 78.9,
+    "bbox": [
+      1656,
+      84,
+      2313,
+      113
+    ],
+    "text_en": "If you want a more realistic finish, please use the basic colors below.",
+    "region": 6
+  },
+  {
+    "text_ja": "*括装にはより安全な「水性法料」のご使用をおすすめします。",
+    "confidence": 76.0,
+    "bbox": [
+      1656,
+      116,
+      2335,
+      149
+    ],
+    "text_en": "* We recommend using a safer \"water-based fee\" for bracketing.",
+    "region": 6
+  },
+  {
+    "text_ja": "スラスターなどイエロー部の塗装色",
+    "confidence": 85.9,
+    "bbox": [
+      1963,
+      173,
+      2355,
+      207
+    ],
+    "text_en": "Painting color of yellow part such as thruster",
+    "region": 6
+  },
+  {
+    "text_ja": "ホワイト(7096)+オレンジイエロー(309%)",
+    "confidence": 87.8,
+    "bbox": [
+      1963,
+      205,
+      2351,
+      237
+    ],
+    "text_en": "White (7096) + Orange Yellow (309%)",
+    "region": 6
+  },
+  {
+    "text_ja": "+オレンジ(少置)",
+    "confidence": 80.5,
+    "bbox": [
+      1964,
+      238,
+      2141,
+      262
+    ],
+    "text_en": "+ Orange (Missing)",
+    "region": 6
+  },
+  {
+    "text_ja": "四MSN-O06Sシナンジュ指定色",
+    "confidence": 72.1,
+    "bbox": [
+      1073,
+      92,
+      1606,
+      138
+    ],
+    "text_en": "IV MSN-O06S Sinanje designated color",
+    "region": 7
+  },
+  {
+    "text_ja": "武器などの沙装色",
+    "confidence": 63.3,
+    "bbox": [
+      1292,
+      173,
+      1492,
+      204
+    ],
+    "text_en": "Sand color for weapons, etc.",
+    "region": 7
+  },
+  {
+    "text_ja": "+ダークグリーン(3096)",
+    "confidence": 91.6,
+    "bbox": [
+      1293,
+      236,
+      1562,
+      261
+    ],
+    "text_en": "+ Dark Green (3096)",
+    "region": 7
+  },
+  {
+    "text_ja": "|",
+    "confidence": 78.0,
+    "bbox": [
+      309,
+      137,
+      322,
+      307
+    ],
+    "text_en": "|",
+    "region": 8
+  },
+  {
+    "text_ja": "|",
+    "confidence": 5.0,
+    "bbox": [
+      354,
+      140,
+      400,
+      202
+    ],
+    "text_en": "|",
+    "region": 9
+  },
+  {
+    "text_ja": "還還",
+    "confidence": 0.0,
+    "bbox": [
+      1101,
+      163,
+      1181,
+      205
+    ],
+    "text_en": "Give back",
+    "region": 10
+  },
+  {
+    "text_ja": "ロケット・バズーカの的装色",
+    "confidence": 81.6,
+    "bbox": [
+      1964,
+      298,
+      2266,
+      329
+    ],
+    "text_en": "Rocket Bazooka Targeted Color",
+    "region": 11
+  },
+  {
+    "text_ja": "グレー(8596)+ブラック(1096)",
+    "confidence": 85.5,
+    "bbox": [
+      1963,
+      328,
+      2319,
+      359
+    ],
+    "text_en": "Grey (8596) + Black (1096)",
+    "region": 11
+  },
+  {
+    "text_ja": "+ォバープル(596)",
+    "confidence": 74.6,
+    "bbox": [
+      1963,
+      357,
+      2149,
+      390
+    ],
+    "text_en": "+ Oberpool (596)",
+    "region": 11
+  },
+  {
+    "text_ja": "センサーなどの稚装色",
+    "confidence": 67.7,
+    "bbox": [
+      1287,
+      297,
+      1533,
+      334
+    ],
+    "text_en": "Childhood colors such as sensors",
+    "region": 12
+  },
+  {
+    "text_ja": "クリアー(709%)+クリアブルー(209%)",
+    "confidence": 88.5,
+    "bbox": [
+      1287,
+      329,
+      1716,
+      356
+    ],
+    "text_en": "Clear (709%) + Clear Blue (209%)",
+    "region": 12
+  },
+  {
+    "text_ja": "+クリアイエロー(1096)",
+    "confidence": 91.2,
+    "bbox": [
+      1287,
+      358,
+      1557,
+      393
+    ],
+    "text_en": "+ Clear Yellow (1096)",
+    "region": 12
+  },
+  {
+    "text_ja": "人請還",
+    "confidence": 11.0,
+    "bbox": [
+      1067,
+      288,
+      1186,
+      343
+    ],
+    "text_en": "human redemption",
+    "region": 13
+  },
+  {
+    "text_ja": "関節などの彼装色",
+    "confidence": 60.5,
+    "bbox": [
+      635,
+      308,
+      834,
+      344
+    ],
+    "text_en": "The color of his joints etc.",
+    "region": 14
+  },
+  {
+    "text_ja": "グレー(9096)+ブラック(1096)",
+    "confidence": 91.1,
+    "bbox": [
+      635,
+      338,
+      992,
+      373
+    ],
+    "text_en": "Grey (9096) + Black (1096)",
+    "region": 14
+  },
+  {
+    "text_ja": "し",
+    "confidence": 62.0,
+    "bbox": [
+      1753,
+      296,
+      1805,
+      357
+    ],
+    "text_en": "death",
+    "region": 15
+  },
+  {
+    "text_ja": "ンーーー",
+    "confidence": 48.0,
+    "bbox": [
+      425,
+      419,
+      560,
+      453
+    ],
+    "text_en": "Mmmm.",
+    "region": 17
+  },
+  {
+    "text_ja": "アー",
+    "confidence": 33.0,
+    "bbox": [
+      1078,
+      407,
+      1135,
+      453
+    ],
+    "text_en": "A",
+    "region": 18
+  },
+  {
+    "text_ja": "袖、胸など装番部の党装色",
+    "confidence": 58.3,
+    "bbox": [
+      1291,
+      423,
+      1579,
+      460
+    ],
+    "text_en": "Party clothing colors on sleeves, chest, etc.",
+    "region": 19
+  },
+  {
+    "text_ja": "ゴールド(BS9%)",
+    "confidence": 77.7,
+    "bbox": [
+      1292,
+      454,
+      1458,
+      490
+    ],
+    "text_en": "Gold (BS9%)",
+    "region": 19
+  },
+  {
+    "text_ja": "+クリアイエロー(1596)",
+    "confidence": 91.6,
+    "bbox": [
+      1292,
+      486,
+      1562,
+      511
+    ],
+    "text_en": "+Clear yellow (1596)",
+    "region": 19
+  },
+  {
+    "text_ja": "'ロケット・バズーカ、ライトグレー部の小装色",
+    "confidence": 81.3,
+    "bbox": [
+      1571,
+      422,
+      2380,
+      454
+    ],
+    "text_en": "'Rocket Bazooka, light gray accessory color",
+    "region": 20
+  },
+  {
+    "text_ja": "ホホワイト(709%)+グレー(3096)",
+    "confidence": 76.1,
+    "bbox": [
+      1961,
+      452,
+      2319,
+      484
+    ],
+    "text_en": "White (709%) + Gray (3096)",
+    "region": 20
+  },
+  {
+    "text_ja": "+ォバープル(少量)",
+    "confidence": 78.7,
+    "bbox": [
+      1963,
+      481,
+      2156,
+      514
+    ],
+    "text_en": "+ Ovapur (small amount)",
+    "region": 20
+  },
+  {
+    "text_ja": "※カラー配合は参考値ごあり、画像とカラーガイドの色は軸なる場合があります。",
+    "confidence": 76.9,
+    "bbox": [
+      1585,
+      534,
+      2374,
+      563
+    ],
+    "text_en": "* Reference values are available for color combinations, and the colors of images and color guides may be axial.",
+    "region": 20
+  },
+  {
+    "text_ja": "胸などの流半色",
+    "confidence": 36.5,
+    "bbox": [
+      634,
+      424,
+      808,
+      473
+    ],
+    "text_en": "Chest, etc.",
+    "region": 21
+  },
+  {
+    "text_ja": "ミッドナイトブル(1009%)",
+    "confidence": 73.6,
+    "bbox": [
+      635,
+      467,
+      944,
+      492
+    ],
+    "text_en": "Midnight Bull (1009%)",
+    "region": 21
+  },
+  {
+    "text_ja": "|",
+    "confidence": 54.0,
+    "bbox": [
+      2460,
+      516,
+      2478,
+      599
+    ],
+    "text_en": "|",
+    "region": 22
+  },
+  {
+    "text_ja": "FIGUREフル・フロンタル",
+    "confidence": 91.8,
+    "bbox": [
+      409,
+      613,
+      861,
+      649
+    ],
+    "text_en": "FIGUREFull Frontal",
+    "region": 23
+  },
+  {
+    "text_ja": "頂、振などの浴徹折",
+    "confidence": 37.1,
+    "bbox": [
+      956,
+      707,
+      1117,
+      749
+    ],
+    "text_en": "Thorough bathing such as peak and swing",
+    "region": 23
+  },
+  {
+    "text_ja": "]||革葉色(5096)+ホワイト(5O9)||2)",
+    "confidence": 52.6,
+    "bbox": [
+      370,
+      712,
+      1103,
+      788
+    ],
+    "text_en": "] || Leather (5096) + White (5O9) || 2)",
+    "region": 23
+  },
+  {
+    "text_ja": "原の池代名",
+    "confidence": 26.4,
+    "bbox": [
+      535,
+      718,
+      631,
+      760
+    ],
+    "text_en": "Hara no Ike Daimyo",
+    "region": 23
+  },
+  {
+    "text_ja": "EE",
+    "confidence": 32.0,
+    "bbox": [
+      370,
+      790,
+      1093,
+      888
+    ],
+    "text_en": "EEE",
+    "region": 23
+  },
+  {
+    "text_ja": "彼和の和装色",
+    "confidence": 5.2,
+    "bbox": [
+      953,
+      800,
+      1070,
+      843
+    ],
+    "text_en": "His Japanese kimono color",
+    "region": 23
+  },
+  {
+    "text_ja": "モンザレッド(1009%)+オレンジイエロー(20%)",
+    "confidence": 82.0,
+    "bbox": [
+      538,
+      841,
+      1177,
+      883
+    ],
+    "text_en": "Monza Red (1009%) + Orange Yellow (20%)",
+    "region": 23
+  },
+  {
+    "text_ja": "|+ホワイト(少置)",
+    "confidence": 82.1,
+    "bbox": [
+      370,
+      874,
+      1093,
+      903
+    ],
+    "text_en": "| + White (missing)",
+    "region": 23
+  },
+  {
+    "text_ja": "靖。\"・の治ら",
+    "confidence": 11.8,
+    "bbox": [
+      370,
+      910,
+      1088,
+      947
+    ],
+    "text_en": "Yasushi. \"・Noji et al.",
+    "region": 23
+  },
+  {
+    "text_ja": "衣、窒などの省該色",
+    "confidence": 42.8,
+    "bbox": [
+      956,
+      717,
+      1116,
+      743
+    ],
+    "text_en": "Applicable colors for clothing, nitrogen, etc.",
+    "region": 26
+  },
+  {
+    "text_ja": "プラック(8O%)",
+    "confidence": 78.8,
+    "bbox": [
+      957,
+      738,
+      1088,
+      764
+    ],
+    "text_en": "Plaque (8O%)",
+    "region": 26
+  },
+  {
+    "text_ja": "+ホワイト(1096)",
+    "confidence": 68.7,
+    "bbox": [
+      956,
+      759,
+      1103,
+      784
+    ],
+    "text_en": "+White (1096)",
+    "region": 26
+  },
+  {
+    "text_ja": "装生の波閑双",
+    "confidence": 10.0,
+    "bbox": [
+      953,
+      811,
+      1069,
+      837
+    ],
+    "text_en": "Haisho no Wa Kanju",
+    "region": 26
+  },
+  {
+    "text_ja": "ビまロビピゴ(-91)",
+    "confidence": 51.6,
+    "bbox": [
+      956,
+      832,
+      1093,
+      857
+    ],
+    "text_en": "Bima Robipigo (-91)",
+    "region": 26
+  },
+  {
+    "text_ja": "+ォオレンジイエロー(206)",
+    "confidence": 71.7,
+    "bbox": [
+      956,
+      853,
+      1177,
+      878
+    ],
+    "text_en": "+ Orange Yellow (206)",
+    "region": 26
+  },
+  {
+    "text_ja": "+ホワイト(少置)",
+    "confidence": 78.9,
+    "bbox": [
+      956,
+      874,
+      1094,
+      899
+    ],
+    "text_en": "+ White (omitted)",
+    "region": 26
+  },
+  {
+    "text_ja": "早の徒毅色",
+    "confidence": 9.2,
+    "bbox": [
+      955,
+      915,
+      1051,
+      941
+    ],
+    "text_en": "early daring color",
+    "region": 26
+  },
+  {
+    "text_ja": "ホワイト(7596)",
+    "confidence": 91.7,
+    "bbox": [
+      955,
+      937,
+      1088,
+      957
+    ],
+    "text_en": "White (7596)",
+    "region": 26
+  },
+  {
+    "text_ja": "つう)",
+    "confidence": 46.0,
+    "bbox": [
+      956,
+      957,
+      1110,
+      981
+    ],
+    "text_en": "Tu)",
+    "region": 26
+  },
+  {
+    "text_ja": "+昌入色(1096)6",
+    "confidence": 38.2,
+    "bbox": [
+      954,
+      977,
+      1192,
+      1019
+    ],
+    "text_en": "+Choiri color(1096)6",
+    "region": 26
+  },
+  {
+    "text_ja": "スミ入れしてみよっう!",
+    "confidence": 87.0,
+    "bbox": [
+      1354,
+      715,
+      1654,
+      764
+    ],
+    "text_en": "Let's put Sumi in it!",
+    "region": 27
+  },
+  {
+    "text_ja": "ガンダムマーカー/スミ",
+    "confidence": 94.3,
+    "bbox": [
+      1354,
+      766,
+      1655,
+      801
+    ],
+    "text_en": "Gundam Marker/Sumi",
+    "region": 27
+  },
+  {
+    "text_ja": "入れ用(別売り)などを",
+    "confidence": 93.4,
+    "bbox": [
+      1353,
+      803,
+      1655,
+      841
+    ],
+    "text_en": "Put it in for use (sold separately), etc.",
+    "region": 27
+  },
+  {
+    "text_ja": "使用して、キットのスジ",
+    "confidence": 93.6,
+    "bbox": [
+      1353,
+      840,
+      1656,
+      877
+    ],
+    "text_en": "Use the kit stripes",
+    "region": 27
+  },
+  {
+    "text_ja": "彫りを塗装することで、",
+    "confidence": 82.4,
+    "bbox": [
+      1353,
+      878,
+      1652,
+      916
+    ],
+    "text_en": "By painting the carvings,",
+    "region": 27
+  },
+  {
+    "text_ja": "立体感、リアル感が増し",
+    "confidence": 92.4,
+    "bbox": [
+      1353,
+      914,
+      1655,
+      952
+    ],
+    "text_en": "Increased sense of three-dimensionality and realism",
+    "region": 27
+  },
+  {
+    "text_ja": "ます。スミ入れするだけ",
+    "confidence": 92.1,
+    "bbox": [
+      1353,
+      954,
+      1654,
+      989
+    ],
+    "text_en": "Masu. Just add ink",
+    "region": 27
+  },
+  {
+    "text_ja": "で見違えるような仕上",
+    "confidence": 95.6,
+    "bbox": [
+      1353,
+      990,
+      1655,
+      1028
+    ],
+    "text_en": "An unmistakable finish",
+    "region": 27
+  },
+  {
+    "text_ja": "がりになります。",
+    "confidence": 92.4,
+    "bbox": [
+      1354,
+      1032,
+      1552,
+      1059
+    ],
+    "text_en": "It will become stiff.",
+    "region": 27
+  },
+  {
+    "text_ja": "|坦茶色(5096)+ホホワイト(5096)[",
+    "confidence": 55.3,
+    "bbox": [
+      527,
+      714,
+      854,
+      784
+    ],
+    "text_en": "|Flat brown (5096) + White (5096) [",
+    "region": 28
+  },
+  {
+    "text_ja": "肛の挫徹名",
+    "confidence": 3.4,
+    "bbox": [
+      535,
+      729,
+      632,
+      758
+    ],
+    "text_en": "name of anus",
+    "region": 28
+  },
+  {
+    "text_ja": "【before】",
+    "confidence": 78.0,
+    "bbox": [
+      1745,
+      1060,
+      1908,
+      1098
+    ],
+    "text_en": "[before]",
+    "region": 29
+  },
+  {
+    "text_ja": "4",
+    "confidence": 47.0,
+    "bbox": [
+      2072,
+      717,
+      2186,
+      835
+    ],
+    "text_en": "4",
+    "region": 30
+  },
+  {
+    "text_ja": "ミッ",
+    "confidence": 34.0,
+    "bbox": [
+      2072,
+      963,
+      2349,
+      1098
+    ],
+    "text_en": "Mi",
+    "region": 30
+  },
+  {
+    "text_ja": "バンツの緒装色",
+    "confidence": 58.5,
+    "bbox": [
+      538,
+      932,
+      667,
+      960
+    ],
+    "text_en": "Bantu's dress color",
+    "region": 32
+  },
+  {
+    "text_ja": "ホワイト(1009%)",
+    "confidence": 80.7,
+    "bbox": [
+      538,
+      955,
+      682,
+      973
+    ],
+    "text_en": "White (1009%)",
+    "region": 32
+  },
+  {
+    "text_ja": "||ウッドブラウン(10096)",
+    "confidence": 77.7,
+    "bbox": [
+      407,
+      1009,
+      732,
+      1085
+    ],
+    "text_en": "|| Wood Brown (10096)",
+    "region": 32
+  },
+  {
+    "text_ja": "プーツの之話双",
+    "confidence": 73.0,
+    "bbox": [
+      538,
+      1025,
+      667,
+      1053
+    ],
+    "text_en": "Tales of the Poots Double",
+    "region": 32
+  },
+  {
+    "text_ja": "ん県一す|",
+    "confidence": 40.4,
+    "bbox": [
+      1818,
+      1079,
+      1908,
+      1100
+    ],
+    "text_en": "Nkenichisu |",
+    "region": 33
+  },
+  {
+    "text_ja": "|",
+    "confidence": 33.0,
+    "bbox": [
+      359,
+      1091,
+      400,
+      1161
+    ],
+    "text_en": "|",
+    "region": 34
+  },
+  {
+    "text_ja": "-|",
+    "confidence": 65.5,
+    "bbox": [
+      2386,
+      1168,
+      2493,
+      1297
+    ],
+    "text_en": null,
+    "region": 36
+  },
+  {
+    "text_ja": "|1/1ロロscaleSINANIJU",
+    "confidence": 77.0,
+    "bbox": [
+      314,
+      1189,
+      1063,
+      1280
+    ],
+    "text_en": "|1/1 Roro scaleSINANIJU",
+    "region": 37
+  },
+  {
+    "text_ja": "ーー",
+    "confidence": 46.0,
+    "bbox": [
+      1597,
+      1216,
+      1963,
+      1222
+    ],
+    "text_en": "-",
+    "region": 39
+  }
+]
